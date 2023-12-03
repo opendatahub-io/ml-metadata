@@ -42,17 +42,17 @@ _public_protos = [
     "//ml_metadata/proto:metadata_store_service_pb2_grpc.py",
 ]
 
-_py_extension = select({
-    ":windows": [
-        "//ml_metadata/metadata_store/pywrap:metadata_store_extension.pyd",
-    ],
-    "//conditions:default": [
-        "//ml_metadata/metadata_store/pywrap:metadata_store_extension.so",
-    ],
-})
+# _py_extension = select({
+#     ":windows": [
+#         "//ml_metadata/metadata_store/pywrap:metadata_store_extension.pyd",
+#    ],
+#    "//conditions:default": [
+#        "//ml_metadata/metadata_store/pywrap:metadata_store_extension.so",
+#    ],
+# })
 
 sh_binary(
     name = "move_generated_files",
     srcs = ["move_generated_files.sh"],
-    data = _py_extension + _public_protos,
+    data = _public_protos,
 )
