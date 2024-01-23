@@ -43,17 +43,19 @@ rules_foreign_cc_dependencies()
 
 http_archive(
     name = "com_google_absl",
-    urls = ["https://github.com/abseil/abseil-cpp/archive/940c06c25d2953f44310b68eb8aab6114dba11fb.zip"],
-    strip_prefix = "abseil-cpp-940c06c25d2953f44310b68eb8aab6114dba11fb",
-    sha256 = "0e800799aa64d0b4d354f3ff317bbd5fbf42f3a522ab0456bb749fc8d3b67415",
+    sha256 = "59d2976af9d6ecf001a81a35749a6e551a335b949d34918cfade07737b9d93c5",
+    strip_prefix = "abseil-cpp-20230802.0",
+    urls = [
+        "https://github.com/abseil/abseil-cpp/archive/refs/tags/20230802.0.tar.gz"
+    ],
 )
 
 http_archive(
     name = "boringssl",
-    sha256 = "1188e29000013ed6517168600fc35a010d58c5d321846d6a6dfee74e4c788b45",
-    strip_prefix = "boringssl-7f634429a04abc48e2eb041c81c5235816c96514",
+    sha256 = "f69738ca17f1dd30ae3ddb1fa7519245044737d27c8a3defa7a94718d9dfd724",
+    strip_prefix = "boringssl-68dcc7f7b816e199c8f373ea0a2d6a4e1f526e2d",
     urls = [
-        "https://github.com/google/boringssl/archive/7f634429a04abc48e2eb041c81c5235816c96514.tar.gz",
+        "https://github.com/google/boringssl/archive/68dcc7f7b816e199c8f373ea0a2d6a4e1f526e2d.tar.gz",
     ],
 )
 
@@ -122,9 +124,9 @@ protobuf_deps()
 http_archive(
     name = "zlib",
     build_file = "@com_google_protobuf//:third_party/zlib.BUILD",
-    sha256 = "d8688496ea40fb61787500e863cc63c9afcbc524468cedeb478068924eb54932",
-    strip_prefix = "zlib-1.2.12",
-    urls = ["https://github.com/madler/zlib/archive/v1.2.12.tar.gz"],
+    sha256 = "ff0ba4c292013dbc27530b3a81e1f9a813cd39de01ca5e0f8bf355702efa593e",
+    strip_prefix = "zlib-1.3",
+    urls = ["https://github.com/madler/zlib/releases/download/v1.3/zlib-1.3.tar.gz"],
 )
 
 http_archive(
@@ -248,13 +250,25 @@ http_archive(
     url = "https://github.com/gflags/gflags/archive/a738fdf9338412f83ab3f26f31ac11ed3f3ec4bd.zip",
 )
 
-ZETASQL_COMMIT = "ac37cf5c0d80b5605176fc0f29e87b12f00be693" # 08/10/2022
+# TODO: can we import the proper zetasql version based on some config provided in the build command?
+# Required for Fedora39 and ubi8
+# ZETASQL_COMMIT = "ac37cf5c0d80b5605176fc0f29e87b12f00be693" # 08/10/2022
+# http_archive(
+#     name = "com_google_zetasql",
+#     urls = ["https://github.com/google/zetasql/archive/%s.zip" % ZETASQL_COMMIT],
+#     strip_prefix = "zetasql-%s" % ZETASQL_COMMIT,
+#     #patches = ["//ml_metadata/third_party:zetasql.patch"],
+#     sha256 = '651a768cd51627f58aa6de7039aba9ddab22f4b0450521169800555269447840'
+# )
+
+# Required for Fedora:38 and ubi9
+ZETASQL_COMMIT = "f764f4e986ac1516ab5ae95e6d6ce2f4416cc6ff" # 02/03/2023
 http_archive(
     name = "com_google_zetasql",
     urls = ["https://github.com/google/zetasql/archive/%s.zip" % ZETASQL_COMMIT],
     strip_prefix = "zetasql-%s" % ZETASQL_COMMIT,
     #patches = ["//ml_metadata/third_party:zetasql.patch"],
-    sha256 = '651a768cd51627f58aa6de7039aba9ddab22f4b0450521169800555269447840'
+    sha256 = '27e3d8bfd1f76918fc4d7a8f29646b8a0cdca567f921e0bff4a07f79448e92c0'
 )
 
 load("@com_google_zetasql//bazel:zetasql_deps_step_1.bzl", "zetasql_deps_step_1")

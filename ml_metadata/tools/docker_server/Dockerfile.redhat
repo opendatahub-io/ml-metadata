@@ -1,0 +1,69 @@
+FROM registry.access.redhat.com/ubi9/ubi:latest as builder
+
+USER root
+
+RUN dnf update -y -q && \
+  dnf install -y -q \
+  which \
+  patch \
+  gcc \
+  clang \
+  cmake \
+  make \
+  openssl \
+  ca-certificates \
+  unzip \
+  git \
+  findutils \
+  python3 \
+  python3-devel
+
+# Set up Bazel 5.3.0
+ENV BAZEL_VERSION 5.3.0
+WORKDIR /
+RUN mkdir /bazel && \
+    cd /bazel && \
+    curl -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36" -fSsL -O https://github.com/bazelbuild/bazel/releases/download/$BAZEL_VERSION/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh && \
+    curl -H "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36" -fSsL -o /bazel/LICENSE.txt https://raw.githubusercontent.com/bazelbuild/bazel/master/LICENSE && \
+    chmod +x bazel-*.sh && \
+    ./bazel-$BAZEL_VERSION-installer-linux-x86_64.sh && \
+    cd / && \
+    rm -f /bazel/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh
+
+
+COPY . /mlmd-src
+WORKDIR /mlmd-src
+
+
+# Fetch the bazel cache and deps into local root bazel cache
+# RUN cp -R /mlmd-src/_bazel_root/* $(bazel info output_base)/..
+
+# Running in offline mode with --nofetch arg, cache and deps must be cloned 
+# into the local root bazel cache
+# "-std=c++17" is needed in order to build with ZetaSQL.
+RUN bazel build -c opt --action_env=PATH \
+  --define=grpc_no_ares=true \
+  //ml_metadata/metadata_store:metadata_store_server \
+  --cxxopt="-std=c++17" --host_cxxopt="-std=c++17"
+
+# copying libmysqlclient source onto THIRD_PARTY folder.
+RUN mkdir -p /mlmd-src/third_party
+RUN cp -RL /mlmd-src/bazel-mlmd-src/external/libmysqlclient /mlmd-src/third_party/mariadb-connector-c
+
+FROM registry.redhat.io/ubi9/ubi-minimal:latest
+
+COPY --from=builder /mlmd-src/bazel-bin/ml_metadata/metadata_store/metadata_store_server /bin/metadata_store_server
+COPY --from=builder /mlmd-src/third_party /mlmd-src/third_party
+
+ENV GRPC_PORT "8080"
+ENV METADATA_STORE_SERVER_CONFIG_FILE ""
+
+# Introduces tzdata package here to avoid LoadTimeZone check failed error in the metadata store server.
+RUN microdnf update -y && \
+  microdnf install -y \
+  tzdata
+
+ENTRYPOINT \
+  "/bin/metadata_store_server" \
+  "--grpc_port=${GRPC_PORT}" \
+  "--metadata_store_server_config_file=${METADATA_STORE_SERVER_CONFIG_FILE}"

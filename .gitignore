@@ -1,0 +1,2 @@
+# Ignore bazel target dirs
+bazel-*
