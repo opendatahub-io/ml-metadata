@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/ubi:latest as builder
+FROM registry.access.redhat.com/ubi8/ubi:8.9 as builder
 
 USER root
 
@@ -15,8 +15,7 @@ RUN dnf update -y -q && \
   unzip \
   git \
   findutils \
-  python3 \
-  python3-devel
+  python3
 
 # Set up Bazel 5.3.0
 ENV BAZEL_VERSION 5.3.0
@@ -34,10 +33,6 @@ RUN mkdir /bazel && \
 COPY . /mlmd-src
 WORKDIR /mlmd-src
 
-
-# Fetch the bazel cache and deps into local root bazel cache
-# RUN cp -R /mlmd-src/_bazel_root/* $(bazel info output_base)/..
-
 # Running in offline mode with --nofetch arg, cache and deps must be cloned 
 # into the local root bazel cache
 # "-std=c++17" is needed in order to build with ZetaSQL.
@@ -50,7 +45,7 @@ RUN bazel build -c opt --action_env=PATH \
 RUN mkdir -p /mlmd-src/third_party
 RUN cp -RL /mlmd-src/bazel-mlmd-src/external/libmysqlclient /mlmd-src/third_party/mariadb-connector-c
 
-FROM registry.redhat.io/ubi9/ubi-minimal:latest
+FROM registry.redhat.io/ubi8/ubi-minimal:8.9
 
 COPY --from=builder /mlmd-src/bazel-bin/ml_metadata/metadata_store/metadata_store_server /bin/metadata_store_server
 COPY --from=builder /mlmd-src/third_party /mlmd-src/third_party
