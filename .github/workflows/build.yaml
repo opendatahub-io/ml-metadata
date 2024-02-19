@@ -1,0 +1,31 @@
+name: Container Image Build
+on:
+  pull_request:
+    paths-ignore:
+      - 'LICENSE*'
+      - '**.gitignore'
+      - '**.md'
+      - '**.txt'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/dependabot.yml'
+      - 'docs/**'
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate Tag
+        shell: bash
+        id: tags
+        run: |
+          commit_sha=${{ github.event.after }}
+          tag=main-${commit_sha:0:7}
+          echo "tag=${tag}" >> $GITHUB_OUTPUT
+      - name: Build Image
+        shell: bash
+        env:
+          DOCKER_IMAGE_REPO: quay.io/opendatahub/mlmd-grpc-server
+          DOCKER_IMAGE_TAG: ${{ steps.tags.outputs.tag }}
+          DOCKER_FILE: Dockerfile.redhat
+        run: ./ml_metadata/tools/docker_server/build_docker_image.sh

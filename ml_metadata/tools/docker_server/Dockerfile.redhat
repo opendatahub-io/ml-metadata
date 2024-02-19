@@ -29,7 +29,6 @@ RUN mkdir /bazel && \
     cd / && \
     rm -f /bazel/bazel-$BAZEL_VERSION-installer-linux-x86_64.sh
 
-
 COPY . /mlmd-src
 WORKDIR /mlmd-src
 
@@ -45,7 +44,7 @@ RUN bazel build -c opt --action_env=PATH \
 RUN mkdir -p /mlmd-src/third_party
 RUN cp -RL /mlmd-src/bazel-mlmd-src/external/libmysqlclient /mlmd-src/third_party/mariadb-connector-c
 
-FROM registry.redhat.io/ubi8/ubi-minimal:8.9
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.9
 
 COPY --from=builder /mlmd-src/bazel-bin/ml_metadata/metadata_store/metadata_store_server /bin/metadata_store_server
 COPY --from=builder /mlmd-src/third_party /mlmd-src/third_party
