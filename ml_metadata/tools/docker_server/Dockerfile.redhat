@@ -54,7 +54,7 @@ ENV METADATA_STORE_SERVER_CONFIG_FILE ""
 
 # Introduces tzdata package here to avoid LoadTimeZone check failed error in the metadata store server.
 RUN microdnf update -y && \
-  microdnf install -y \
+  microdnf reinstall -y \
   tzdata
 
 ENTRYPOINT \
