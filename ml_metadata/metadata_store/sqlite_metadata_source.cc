@@ -174,7 +174,7 @@ absl::Status SqliteMetadataSource::RollbackImpl() {
 }
 
 std::string SqliteMetadataSource::EscapeString(absl::string_view value) const {
-  return SqliteEscapeString(value);
+  return absl::StrCat("'", SqliteEscapeString(value), "'");
 }
 
 std::string SqliteMetadataSource::EncodeBytes(absl::string_view value) const {
