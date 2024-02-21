@@ -1,0 +1,51 @@
+name: Build MLMD gRPC Server image for Master branch
+on:
+  push:
+    branches:
+      - master
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  QUAY_ORG: opendatahub
+  QUAY_ID: ${{ secrets.QUAY_USERNAME }}
+  QUAY_TOKEN: ${{ secrets.QUAY_PASSWORD }}
+  MLMD_IMAGE_REPO: mlmd-grpc-server
+  MLMD_IMAGE_DOCKERFILE: Dockerfile.redhat
+  SOURCE_BRANCH: master
+
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate Tag
+        shell: bash
+        id: tags
+        run: |
+          commit_sha=${{ github.event.after }}
+          tag=main-${commit_sha:0:7}
+          echo "tag=${tag}" >> $GITHUB_OUTPUT
+      - name: Build Image
+        uses: ./.github/actions/build
+        with:
+          QUAY_ORG: ${{ env.QUAY_ORG }}
+          IMAGE_REPO: ${{ env.MLMD_IMAGE_REPO }}
+          IMAGE_TAG: ${{ steps.tags.outputs.tag }}
+          DOCKERFILE: ${{ env.MLMD_IMAGE_DOCKERFILE }}
+      - name: Login to Quay
+        uses: docker/login-action@v3
+        with:
+          registry: quay.io
+          username: ${{ env.QUAY_ID }}
+          password: ${{ env.QUAY_TOKEN }}
+      - name: Push Images
+        env:
+          IMG: quay.io/${{ env.QUAY_ORG }}/${{ env.MLMD_IMAGE_REPO }}
+          MAIN_HASH_TAG: ${{ steps.tags.outputs.tag }}
+        run: |
+          docker push ${IMG}:${MAIN_HASH_TAG}
+          docker tag ${IMG}:${MAIN_HASH_TAG} ${IMG}:latest
+          docker push ${IMG}:latest
+          docker tag ${IMG}:${MAIN_HASH_TAG} ${IMG}:main
+          docker push ${IMG}:main

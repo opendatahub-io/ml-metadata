@@ -1,0 +1,40 @@
+name: Container Image Build
+on:
+  pull_request:
+    paths-ignore:
+      - 'LICENSE*'
+      - '**.gitignore'
+      - '**.md'
+      - '**.txt'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/dependabot.yml'
+      - 'docs/**'
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref }}
+  cancel-in-progress: true
+env:
+  QUAY_ORG: opendatahub
+  QUAY_ID: ${{ secrets.QUAY_USERNAME }}
+  QUAY_TOKEN: ${{ secrets.QUAY_PASSWORD }}
+  MLMD_IMAGE_REPO: mlmd-grpc-server
+  MLMD_IMAGE_DOCKERFILE: Dockerfile.redhat
+  SOURCE_BRANCH: ${{ github.ref }}
+jobs:
+  build-image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate Tag
+        shell: bash
+        id: tags
+        run: |
+          commit_sha=${{ github.event.after }}
+          tag=main-${commit_sha:0:7}
+          echo "tag=${tag}" >> $GITHUB_OUTPUT
+      - name: Build Image
+        uses: ./.github/actions/build
+        with:
+          QUAY_ORG: ${{ env.QUAY_ORG }}
+          IMAGE_REPO: ${{ env.MLMD_IMAGE_REPO }}
+          IMAGE_TAG: ${{ steps.tags.outputs.tag }}
+          DOCKERFILE: ${{ env.MLMD_IMAGE_DOCKERFILE }}

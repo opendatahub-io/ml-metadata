@@ -1,0 +1,33 @@
+name: "Create a container build"
+description: "This workflow can be used to create a container build from source branches."
+inputs:
+  QUAY_ORG:
+    description: "Quay organization."
+    default: "opendatahub"
+    required: false
+  IMAGE_REPO:
+    description: "Quay image repo name."
+    required: true
+  IMAGE_TAG:
+    description: "Quay image tag."
+    required: true
+  DOCKERFILE:
+    description: "Dockerfile."
+    default: "Dockerfile.redhat"
+    required: false
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ env.SOURCE_BRANCH }}
+        path: build
+    - name: Build image
+      shell: bash
+      working-directory: build
+      env:
+        DOCKER_IMAGE_REPO: quay.io/${{ inputs.QUAY_ORG }}/${{ inputs.IMAGE_REPO }}
+        DOCKER_IMAGE_TAG: ${{ inputs.IMAGE_TAG }}
+        DOCKER_FILE: ${{ inputs.DOCKERFILE }}
+      run: |
+          ./ml_metadata/tools/docker_server/build_docker_image.sh
