@@ -107,7 +107,7 @@ class TestPostgreSQLStandaloneMetadataSourceInitializer
                          .c_str());
     PQclear(res);
     res =
-        PQexec(conn, absl::StrCat("DROP DATABASE IF EXISTS ", db_name).c_str());
+        PQexec(conn, absl::StrCat("DROP DATABASE IF EXISTS \"", db_name, "\"").c_str());
     PQclear(res);
     PQfinish(conn);
   }
