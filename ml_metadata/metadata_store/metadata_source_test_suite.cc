@@ -69,8 +69,8 @@ TEST_P(MetadataSourceTestSuite, TestInsertWithEscapedStringValue) {
   EXPECT_EQ(absl::OkStatus(), metadata_source_->Begin());
   EXPECT_EQ(absl::OkStatus(),
             metadata_source_->ExecuteQuery(
-                absl::StrCat("INSERT INTO t1 VALUES (1, '",
-                             metadata_source_->EscapeString("''"), "')"),
+                absl::StrCat("INSERT INTO t1 VALUES (1, ",
+                             metadata_source_->EscapeString("''"), ")"),
                 nullptr));
   RecordSet expected_results = ParseTextProtoOrDie<RecordSet>(
       R"(column_names: "c1"

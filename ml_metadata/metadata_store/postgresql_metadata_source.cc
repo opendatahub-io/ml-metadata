@@ -252,7 +252,7 @@ absl::Status PostgreSQLMetadataSource::ConnectImpl() {
     MLMD_RETURN_IF_ERROR(databaseExistenceStatus);
     if (record_set.records_size() == 0) {
       const std::string create_database_cmd =
-          absl::Substitute("CREATE DATABASE $0;", config_.dbname().data());
+          absl::Substitute("CREATE DATABASE \"$0\";", config_.dbname().data());
       PGresult* res = PQexec(connDefault, create_database_cmd.c_str());
       if (PQresultStatus(res) != PGRES_COMMAND_OK &&
           PQresultStatus(res) != PGRES_TUPLES_OK) {
