@@ -38,7 +38,9 @@ cc_library(
         "src/common/rmtree.c",
         "src/common/saslprep.c",
         "src/common/scram-common.c",
-        "src/common/sha2.c",
+        # "src/common/sha2.c",
+        # Added sha2_openssl.c
+        "src/common/sha2_openssl.c", # for --with-openssl flag
         "src/common/string.c",
         "src/common/unicode_norm.c",
         "src/common/username.c",
@@ -53,6 +55,10 @@ cc_library(
         "src/interfaces/libpq/fe-protocol2.c",
         "src/interfaces/libpq/fe-protocol3.c",
         "src/interfaces/libpq/fe-secure.c",
+        # Added fe-secure-openssl.c
+        "src/interfaces/libpq/fe-secure-openssl.c", # for --with-openssl flag
+        # Added fe-secure-common.c # for --with-openssl flag
+        "src/interfaces/libpq/fe-secure-common.c",
         "src/interfaces/libpq/libpq-events.c",
         "src/interfaces/libpq/pqexpbuffer.c",
         "src/port/chklocale.c",
@@ -116,8 +122,18 @@ cc_library(
     ] + select({
         "//conditions:default": [],
     }),
+    # Linking libraries required for --with-openssl
     linkopts = select({
-        "//conditions:default": [],
+        "//conditions:default": [
+            "-lcrypto",
+            "-lssl",
+            "-lpthread",
+            "-lz",
+            "-lreadline",
+            "-lrt",
+            "-ldl",
+            "-lm",
+        ],
     }),
     deps = [],
 )
@@ -497,7 +513,8 @@ genrule(
             "#define HAVE_CRYPT 1",
             "",
             "/* Define to 1 if you have the `CRYPTO_lock' function. */",
-            "/* #undef HAVE_CRYPTO_LOCK */",
+            # "/* #undef HAVE_CRYPTO_LOCK */",
+            "#define HAVE_CRYPTO_LOCK 1", # for --with-openssl flag
             "",
             "/* Define to 1 if you have the <crypt.h> header file. */",
             "/* #undef HAVE_CRYPT_H */",
@@ -712,7 +729,8 @@ genrule(
             "/* #undef HAVE_LDAP_INITIALIZE */",
             "",
             "/* Define to 1 if you have the `crypto' library (-lcrypto). */",
-            "/* #undef HAVE_LIBCRYPTO */",
+            #"/* #undef HAVE_LIBCRYPTO */",
+            "#define HAVE_LIBCRYPTO 1", # for --with-openssl flag
             "",
             "/* Define to 1 if you have the `ldap' library (-lldap). */",
             "/* #undef HAVE_LIBLDAP */",
@@ -887,7 +905,8 @@ genrule(
             "/* #undef HAVE_SSL_CLEAR_OPTIONS */",
             "",
             "/* Define to 1 if you have the `SSL_get_current_compression' function. */",
-            "/* #undef HAVE_SSL_GET_CURRENT_COMPRESSION */",
+            # "/* #undef HAVE_SSL_GET_CURRENT_COMPRESSION */",
+            "#define HAVE_SSL_GET_CURRENT_COMPRESSION 1", # for --with-openssl flag
             "",
             "/* Define to 1 if stdbool.h conforms to C99. */",
             "#define HAVE_STDBOOL_H 1",
@@ -1101,7 +1120,8 @@ genrule(
             "/* #undef HAVE_WINLDAP_H */",
             "",
             "/* Define to 1 if you have the `X509_get_signature_nid' function. */",
-            "/* #undef HAVE_X509_GET_SIGNATURE_NID */",
+            # "/* #undef HAVE_X509_GET_SIGNATURE_NID */",
+            "#define HAVE_X509_GET_SIGNATURE_NID 1", # for --with-openssl flag
             "",
             "/* Define to 1 if the assembler supports X86_64's POPCNTQ instruction. */",
             "#define HAVE_X86_64_POPCNTQ 1",
@@ -1176,7 +1196,7 @@ genrule(
             "#define PACKAGE_NAME \"PostgreSQL\"",
             "",
             "/* Define to the full name and version of this package. */",
-            "#define PACKAGE_STRING \"PostgreSQL 12.17\"",
+            "#define PACKAGE_STRING \"PostgreSQL 12.1\"",
             "",
             "/* Define to the one symbol short name of this package. */",
             "#define PACKAGE_TARNAME \"postgresql\"",
@@ -1185,7 +1205,7 @@ genrule(
             "#define PACKAGE_URL \"\"",
             "",
             "/* Define to the version of this package. */",
-            "#define PACKAGE_VERSION \"12.17\"",
+            "#define PACKAGE_VERSION \"12.1\"",
             "",
             "/* Define to the name of a signed 128-bit integer type. */",
             "#define PG_INT128_TYPE __int128",
@@ -1204,13 +1224,13 @@ genrule(
             "#define PG_PRINTF_ATTRIBUTE printf",
             "",
             "/* PostgreSQL version as a string */",
-            "#define PG_VERSION \"12.17\"",
+            "#define PG_VERSION \"12.1\"",
             "",
             "/* PostgreSQL version as a number */",
             "#define PG_VERSION_NUM 120001",
             "",
             "/* A string containing the version number, platform, and C compiler */",
-            "#define PG_VERSION_STR \"PostgreSQL 12.17 on x86_64-apple-darwin19.2.0, compiled by Apple clang version 11.0.0 (clang-1100.0.33.17), 64-bit\"",
+            "#define PG_VERSION_STR \"PostgreSQL 12.1 on x86_64-apple-darwin19.2.0, compiled by Apple clang version 11.0.0 (clang-1100.0.33.17), 64-bit\"",
             "",
             "/* Define to 1 to allow profiling output to be saved separately for each",
             "   process. */",
@@ -1273,7 +1293,8 @@ genrule(
             "/* #undef USE_BSD_AUTH */",
             "",
             "/* Define to use /dev/urandom for random number generation */",
-            "#define USE_DEV_URANDOM 1",
+            # Undefining this, USE_OPENSSL_RANDOM 1 is defined instead
+            "/* #undef USE_DEV_URANDOM */",
             "",
             "/* Define to 1 if you want float4 values to be passed by value.",
             "   (--enable-float4-byval) */",
@@ -1303,10 +1324,12 @@ genrule(
             "/* #undef USE_NAMED_POSIX_SEMAPHORES */",
             "",
             "/* Define to build with OpenSSL support. (--with-openssl) */",
-            "/* #undef USE_OPENSSL */",
+            #"/* #undef USE_OPENSSL */",
+            "#define USE_OPENSSL", # for --with-openssl flag
             "",
             "/* Define to use OpenSSL for random number generation */",
-            "/* #undef USE_OPENSSL_RANDOM */",
+            #"/* #undef USE_OPENSSL_RANDOM */",
+            "#define USE_OPENSSL_RANDOM", # for --with-openssl flag
             "",
             "/* Define to 1 to build with PAM support. (--with-pam) */",
             "/* #undef USE_PAM */",
