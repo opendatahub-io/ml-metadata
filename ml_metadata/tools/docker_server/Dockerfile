@@ -33,7 +33,8 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
   git \
   python3-distutils \
   python-is-python3 \
-  python3-dev
+  python3-dev \
+  libssl-dev
 
 # Set up Bazel 5.3.0
 ENV BAZEL_VERSION 5.3.0

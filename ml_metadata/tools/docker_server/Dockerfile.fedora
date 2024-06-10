@@ -15,7 +15,8 @@ RUN dnf update -y && \
   unzip \
   git \
   python-is-python3 \
-  python3-devel
+  python3-devel \
+  openssl-devel
 
 # Set up Bazel 5.3.0
 ENV BAZEL_VERSION 5.3.0

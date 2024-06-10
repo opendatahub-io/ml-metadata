@@ -15,8 +15,9 @@ RUN dnf update -y -q && \
   unzip \
   git \
   findutils \
-  python3
-
+  python3 \
+  openssl-devel
+    
 # Set up Bazel 5.3.0
 ENV BAZEL_VERSION 5.3.0
 WORKDIR /
