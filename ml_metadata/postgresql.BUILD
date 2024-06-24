@@ -38,6 +38,7 @@ configure_make(
     }),
     configure_options = [
         "--with-openssl",
+        "--without-readline",
         # "--with-libraries=$EXT_BUILD_DEPS/openssl/lib",
         # "--with-includes=$EXT_BUILD_DEPS/openssl/include",
           # See: https://github.com/bazelbuild/rules_foreign_cc/pull/362

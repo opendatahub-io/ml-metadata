@@ -53,7 +53,6 @@ WORKDIR /mlmd-src
 
 # "-std=c++17" is needed in order to build with ZetaSQL.
 RUN bazel build -c opt --action_env=PATH \
-  --jobs=4 \
   --define=grpc_no_ares=true \
   //ml_metadata/metadata_store:metadata_store_server --cxxopt="-std=c++17"
 
@@ -74,7 +73,6 @@ RUN export DEBIAN_FRONTEND=noninteractive && \
   apt-get install --no-install-recommends -y -q --option Acquire::Retries=3 \
   tzdata \
   libssl-dev
-
 
 ENV GRPC_PORT "8080"
 ENV METADATA_STORE_SERVER_CONFIG_FILE ""
