@@ -53,6 +53,7 @@ WORKDIR /mlmd-src
 
 # "-std=c++17" is needed in order to build with ZetaSQL.
 RUN bazel build -c opt --action_env=PATH \
+  --jobs=4 \
   --define=grpc_no_ares=true \
   //ml_metadata/metadata_store:metadata_store_server --cxxopt="-std=c++17"
 
@@ -63,16 +64,20 @@ RUN cp -RL /mlmd-src/bazel-mlmd-src/external/libmysqlclient /mlmd-src/third_part
 FROM ubuntu:20.04
 
 COPY --from=builder /mlmd-src/bazel-bin/ml_metadata/metadata_store/metadata_store_server /bin/metadata_store_server
+COPY --from=builder /mlmd-src/bazel-out/k8-opt/bin/external/postgresql/postgresql/lib/libpq.so.5 /usr/lib/x86_64-linux-gnu/libpq.so.5
+COPY --from=builder /mlmd-src/bazel-out/k8-opt/bin/external/postgresql/postgresql/lib/libpgtypes.so.3 /usr/lib/x86_64-linux-gnu/libpgtypes.so.3
 COPY --from=builder /mlmd-src/third_party /mlmd-src/third_party
 
-ENV GRPC_PORT "8080"
-ENV METADATA_STORE_SERVER_CONFIG_FILE ""
-
-# Introduces tzdata package here to avoid LoadTimeZone check failed error in the metadata store server.
+# # Introduces tzdata package here to avoid LoadTimeZone check failed error in the metadata store server.
 RUN export DEBIAN_FRONTEND=noninteractive && \
   apt-get update -y --option Acquire::Retries=3 && \
   apt-get install --no-install-recommends -y -q --option Acquire::Retries=3 \
-  tzdata
+  tzdata \
+  libssl-dev
+
+
+ENV GRPC_PORT "8080"
+ENV METADATA_STORE_SERVER_CONFIG_FILE ""
 
 ENTRYPOINT \
   "/bin/metadata_store_server" \
