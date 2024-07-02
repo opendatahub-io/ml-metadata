@@ -387,11 +387,11 @@ TEST_P(QueryExecutorTest, DeleteContextsById) {
   MLMD_ASSERT_OK(query_executor_->InsertContext(
       context_type_id, "delete_contexts_by_id_test_1",
       absl::nullopt,
-      absl::Now(), absl::Now(), &context_id_1));
+      absl::Now(), absl::Now(), &context_id_1, "context_owner_1"));
   MLMD_ASSERT_OK(query_executor_->InsertContext(
       context_type_id, "delete_contexts_by_id_test_2",
       absl::nullopt,
-      absl::Now(), absl::Now(), &context_id_2));
+      absl::Now(), absl::Now(), &context_id_2, "context_owner_2"));
 
   Value int_value;
   int_value.set_int_value(3);
@@ -406,11 +406,11 @@ TEST_P(QueryExecutorTest, DeleteContextsById) {
   MLMD_ASSERT_OK(query_executor_->InsertArtifact(
       artifact_type_id, "/foo/bar", absl::nullopt, "artifact",
       absl::nullopt,
-      absl::Now(), absl::Now(), &artifact_id));
+      absl::Now(), absl::Now(), &artifact_id, "artifact_owner"));
   MLMD_ASSERT_OK(query_executor_->InsertExecution(
       execution_type_id, absl::nullopt, "execution",
       absl::nullopt,
-      absl::Now(), absl::Now(), &execution_id));
+      absl::Now(), absl::Now(), &execution_id, "execution_owner"));
 
   // Create attribution and association.
   int64_t attribution_id, association_id;
@@ -495,27 +495,27 @@ TEST_P(QueryExecutorTest, DeleteParentContextsByParentIdAndChildIds) {
   MLMD_ASSERT_OK(query_executor_->InsertContext(
       context_type_id, "parent_context_1",
       "parent_context_1",
-      absl::Now(), absl::Now(), &parent_id_1));
+      absl::Now(), absl::Now(), &parent_id_1, "context_owner_1"));
   MLMD_ASSERT_OK(query_executor_->InsertContext(
       context_type_id, "parent_context_2",
       "parent_context_2",
-      absl::Now(), absl::Now(), &parent_id_2));
+      absl::Now(), absl::Now(), &parent_id_2, "context_owner_2"));
   MLMD_ASSERT_OK(query_executor_->InsertContext(
       context_type_id, "parent_context_3",
       "parent_context_3",
-      absl::Now(), absl::Now(), &parent_id_3));
+      absl::Now(), absl::Now(), &parent_id_3, "context_owner_3"));
   MLMD_ASSERT_OK(query_executor_->InsertContext(
       context_type_id, "child_context_1",
       "child_context_1",
-      absl::Now(), absl::Now(), &child_id_1));
+      absl::Now(), absl::Now(), &child_id_1, "context_owner_1"));
   MLMD_ASSERT_OK(query_executor_->InsertContext(
       context_type_id, "child_context_2",
       "child_context_2",
-      absl::Now(), absl::Now(), &child_id_2));
+      absl::Now(), absl::Now(), &child_id_2, "context_owner_2"));
   MLMD_ASSERT_OK(query_executor_->InsertContext(
       context_type_id, "child_context_3",
       "child_context_3",
-      absl::Now(), absl::Now(), &child_id_3));
+      absl::Now(), absl::Now(), &child_id_3, "context_owner_3"));
 
   // Create Parent Context
   // parent context 1 has three child contexts:
@@ -905,14 +905,14 @@ TEST_P(QueryExecutorTest, SelectArtifacts) {
                   /*state=*/absl::nullopt,
                   /*name=*/"artifact_1", /*external_id=*/test_external_id_1,
                   /*create_time=*/test_create_time,
-                  /*update_time=*/test_create_time, &artifact_id_1));
+                  /*update_time=*/test_create_time, &artifact_id_1, /*registry_group=*/"artifact_owner"));
     ASSERT_EQ(absl::OkStatus(),
               query_executor_->InsertArtifact(
                   /*type_id=*/type_id, /*artifact_uri=*/"artifact_uri",
                   /*state=*/absl::nullopt,
                   /*name=*/"artifact_2", /*external_id=*/"test_artifact_2",
                   /*create_time=*/test_create_time,
-                  /*update_time=*/test_create_time, &artifact_id_2));
+                  /*update_time=*/test_create_time, &artifact_id_2, /*registry_group=*/"artifact_owner"));
     expected_artifact_record_set =
         ParseTextProtoOrDie<RecordSet>(std::string(kArtifactRecordSet));
     // Add __MLMD_NULL__ values because extra ArtifactType fields are populated
@@ -936,6 +936,7 @@ TEST_P(QueryExecutorTest, SelectArtifacts) {
               values: "__MLMD_NULL__"
               values: "__MLMD_NULL__"
               values: "__MLMD_NULL__"
+              values: "artifact_owner"
             )pb"));
     *expected_artifact_record_set.add_records() = artifact_record_1;
     RecordSet::Record artifact_record_2 =
@@ -957,6 +958,7 @@ TEST_P(QueryExecutorTest, SelectArtifacts) {
               values: "__MLMD_NULL__"
               values: "__MLMD_NULL__"
               values: "__MLMD_NULL__"
+              values: "artifact_owner"                 
             )pb"));
     *expected_artifact_record_set.add_records() = artifact_record_2;
   }
@@ -1036,13 +1038,13 @@ TEST_P(QueryExecutorTest, SelectContexts) {
                   /*type_id=*/type_id,
                   /*name=*/"context_1", /*external_id=*/test_external_id_1,
                   /*create_time=*/test_create_time,
-                  /*update_time=*/test_create_time, &context_id_1));
+                  /*update_time=*/test_create_time, &context_id_1, /*registry_group=*/"context_owner"));
     ASSERT_EQ(absl::OkStatus(),
               query_executor_->InsertContext(
                   /*type_id=*/type_id,
                   /*name=*/"context_2", /*external_id=*/"test_context_2",
                   /*create_time=*/test_create_time,
-                  /*update_time=*/test_create_time, &context_id_2));
+                  /*update_time=*/test_create_time, &context_id_2, /*registry_group=*/"context_owner"));
     expected_context_record_set =
         ParseTextProtoOrDie<RecordSet>(std::string(kContextRecordSet));
     // Add __MLMD_NULL__ values because extra ContextType fields are populated
@@ -1064,6 +1066,7 @@ TEST_P(QueryExecutorTest, SelectContexts) {
               values: "__MLMD_NULL__"
               values: "__MLMD_NULL__"
               values: "__MLMD_NULL__"
+              values: "context_owner"
             )pb"));
     *expected_context_record_set.add_records() = context_record_1;
     RecordSet::Record context_record_2 =
@@ -1083,6 +1086,7 @@ TEST_P(QueryExecutorTest, SelectContexts) {
               values: "__MLMD_NULL__"
               values: "__MLMD_NULL__"
               values: "__MLMD_NULL__"
+              values: "context_owner"
             )pb"));
     *expected_context_record_set.add_records() = context_record_2;
   }
@@ -1160,13 +1164,13 @@ TEST_P(QueryExecutorTest, SelectExecutions) {
                   /*type_id=*/type_id, /*last_known_state=*/absl::nullopt,
                   /*name=*/"execution_1", /*external_id=*/test_external_id_1,
                   /*create_time=*/test_create_time,
-                  /*update_time=*/test_create_time, &execution_id_1));
+                  /*update_time=*/test_create_time, &execution_id_1, /*registry_group=*/"execution_owner"));
     ASSERT_EQ(absl::OkStatus(),
               query_executor_->InsertExecution(
                   /*type_id=*/type_id, /*last_known_state=*/absl::nullopt,
                   /*name=*/"execution_2", /*external_id=*/"test_execution_2",
                   /*create_time=*/test_create_time,
-                  /*update_time=*/test_create_time, &execution_id_2));
+                  /*update_time=*/test_create_time, &execution_id_2, /*registry_group=*/"execution_owner"));
     expected_execution_record_set =
         ParseTextProtoOrDie<RecordSet>(std::string(kExecutionRecordSet));
     // Add __MLMD_NULL__ values because extra ExecutionType fields are populated
@@ -1189,6 +1193,7 @@ TEST_P(QueryExecutorTest, SelectExecutions) {
               values: "__MLMD_NULL__"
               values: "__MLMD_NULL__"
               values: "__MLMD_NULL__"
+              values: "execution_owner"
             )pb"));
     *expected_execution_record_set.add_records() = execution_record_1;
     RecordSet::Record execution_record_2 =
@@ -1209,6 +1214,7 @@ TEST_P(QueryExecutorTest, SelectExecutions) {
               values: "__MLMD_NULL__"
               values: "__MLMD_NULL__"
               values: "__MLMD_NULL__"
+              values: "execution_owner"
             )pb"));
     *expected_execution_record_set.add_records() = execution_record_2;
   }
@@ -1351,14 +1357,14 @@ TEST_P(QueryExecutorTest, SelectAttributions) {
                   /*state=*/absl::nullopt,
                   /*name=*/"artifact_1", /*external_id=*/"test_artifact_1",
                   /*create_time=*/test_create_time,
-                  /*update_time=*/test_create_time, &artifact_id_1),
+                  /*update_time=*/test_create_time, &artifact_id_1, /*registry_group=*/"artifact_owner"),
               absl::OkStatus());
     ASSERT_EQ(query_executor_->InsertArtifact(
                   /*type_id=*/artifact_type_id, /*artifact_uri=*/"artifact_uri",
                   /*state=*/absl::nullopt,
                   /*name=*/"artifact_2", /*external_id=*/"test_artifact_2",
                   /*create_time=*/test_create_time,
-                  /*update_time=*/test_create_time, &artifact_id_2),
+                  /*update_time=*/test_create_time, &artifact_id_2, /*registry_group=*/"artifact_owner"),
               absl::OkStatus());
   }
   int64_t context_id;
@@ -1368,7 +1374,7 @@ TEST_P(QueryExecutorTest, SelectAttributions) {
                   /*type_id=*/context_type_id,
                   /*name=*/"context_name", /*external_id=*/"test_context",
                   /*create_time=*/test_create_time,
-                  /*update_time=*/test_create_time, &context_id),
+                  /*update_time=*/test_create_time, &context_id, /*registry_group=*/"context_owner"),
               absl::OkStatus());
   }
   int64_t attribution_id_1;
@@ -1453,14 +1459,14 @@ TEST_P(QueryExecutorTest, SelectAssociations) {
             /*type_id=*/execution_type_id, /*last_known_state=*/absl::nullopt,
             /*name=*/"execution_1", /*external_id=*/"test_execution_1",
             /*create_time=*/test_create_time,
-            /*update_time=*/test_create_time, &execution_id_1),
+            /*update_time=*/test_create_time, &execution_id_1, /*registry_group=*/"execution_owner"),
         absl::OkStatus());
     ASSERT_EQ(
         query_executor_->InsertExecution(
             /*type_id=*/execution_type_id, /*last_known_state=*/absl::nullopt,
             /*name=*/"execution_2", /*external_id=*/"test_execution_2",
             /*create_time=*/test_create_time,
-            /*update_time=*/test_create_time, &execution_id_2),
+            /*update_time=*/test_create_time, &execution_id_2, /*registry_group=*/"execution_owner"),
         absl::OkStatus());
   }
   int64_t context_id;
@@ -1470,7 +1476,7 @@ TEST_P(QueryExecutorTest, SelectAssociations) {
                   /*type_id=*/context_type_id,
                   /*name=*/"context_name", /*external_id=*/"test_context",
                   /*create_time=*/test_create_time,
-                  /*update_time=*/test_create_time, &context_id),
+                  /*update_time=*/test_create_time, &context_id, /*registry_owner=*/"context_owner"),
               absl::OkStatus());
   }
   int64_t association_id_1;

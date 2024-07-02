@@ -521,7 +521,7 @@ std::vector<Event> FilterEventsByDirectionAndEventType(
 
 
 // Creates an Artifact (without properties).
-absl::Status RDBMSMetadataAccessObject::CreateBasicNode(
+absl::Status RDBMSMetadataAccessObject::CreateBasicNode( // FIXME: MAIN CHANGE, add registry_group here
     const Artifact& artifact, const absl::Time create_timestamp,
     int64_t* node_id) {
   return executor_->InsertArtifact(
@@ -532,7 +532,9 @@ absl::Status RDBMSMetadataAccessObject::CreateBasicNode(
                           : absl::nullopt,
       artifact.has_external_id() ? absl::make_optional(artifact.external_id())
                                  : absl::nullopt,
-      create_timestamp, create_timestamp, node_id);
+      create_timestamp, create_timestamp, node_id,
+      artifact.has_registry_group() ? absl::make_optional(artifact.registry_group())
+                                    : absl::nullopt);
 }
 
 // Creates an Execution (without properties).
@@ -548,7 +550,9 @@ absl::Status RDBMSMetadataAccessObject::CreateBasicNode(
                            : absl::nullopt,
       execution.has_external_id() ? absl::make_optional(execution.external_id())
                                   : absl::nullopt,
-      create_timestamp, create_timestamp, node_id);
+      create_timestamp, create_timestamp, node_id,
+      execution.has_registry_group() ? absl::make_optional(execution.registry_group())
+                                     : absl::nullopt);
 }
 
 // Creates a Context (without properties).
@@ -562,7 +566,9 @@ absl::Status RDBMSMetadataAccessObject::CreateBasicNode(
       context.type_id(), context.name(),
       context.has_external_id() ? absl::make_optional(context.external_id())
                                 : absl::nullopt,
-      create_timestamp, create_timestamp, node_id);
+      create_timestamp, create_timestamp, node_id,
+      context.has_registry_group() ? absl::make_optional(context.registry_group())
+                                     : absl::nullopt);
 }
 
 template <>
@@ -1147,7 +1153,7 @@ absl::Status RDBMSMetadataAccessObject::FindParentTypesByTypeIdImpl(
 // Returns INVALID_ARGUMENT error, if the node does not align with its type.
 // Returns detailed INTERNAL error, if query execution fails.
 template <typename Node, typename NodeType>
-absl::Status RDBMSMetadataAccessObject::CreateNodeImpl(
+absl::Status RDBMSMetadataAccessObject::CreateNodeImpl( // FIXME: Update this
     const Node& node, const bool skip_type_and_property_validation,
     const absl::Time create_timestamp, int64_t* node_id) {
   // clear node id
@@ -1727,10 +1733,10 @@ absl::Status RDBMSMetadataAccessObject::FindParentTypesByTypeId(
   return FindParentTypesByTypeIdImpl(type_ids, output_parent_types);
 }
 
-absl::Status RDBMSMetadataAccessObject::CreateArtifact(
+absl::Status RDBMSMetadataAccessObject::CreateArtifact( // FIXME: Update this
     const Artifact& artifact, const bool skip_type_and_property_validation,
     int64_t* artifact_id) {
-  const absl::Status& status = CreateNodeImpl<Artifact, ArtifactType>(
+  const absl::Status& status = CreateNodeImpl<Artifact, ArtifactType>( // FIXME: Update this
       artifact, skip_type_and_property_validation, absl::Now(), artifact_id);
   if (IsUniqueConstraintViolated(status)) {
     return absl::AlreadyExistsError(

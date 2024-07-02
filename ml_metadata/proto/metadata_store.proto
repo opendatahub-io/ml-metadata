@@ -60,6 +60,7 @@ message Artifact {
   // The external id that come from the clients’ system. This field is optional.
   // If set, it must be unique among all artifacts within a database instance.
   optional string external_id = 11;
+  optional string registry_group = 13;
   // Properties of the artifact.
   // Properties must be specified in the ArtifactType.
   map<string, Value> properties = 4;
@@ -304,6 +305,7 @@ message Execution {
   // different from CACHED in that a CANCELED execution will not have any event
   // associated with it. It is different from FAILED in that there is no
   // unexpected error happened and it is regarded as a normal state.
+  optional string registry_group = 12;
   enum State {
     UNKNOWN = 0;
     NEW = 1;
@@ -438,6 +440,8 @@ message Context {
   optional int64 create_time_since_epoch = 7;
   // Output only. Last update time of the context in millisecond since epoch.
   optional int64 last_update_time_since_epoch = 8;
+  // Output only. Reigstry group the resource belongs to.
+  optional string registry_group = 11;
 
   // Output only system metadata.
   optional google.protobuf.Any system_metadata = 10;

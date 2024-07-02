@@ -57,9 +57,9 @@ namespace v7_and_v8 {
 static constexpr absl::string_view kInsertArtifact = R"pb(
   query: " INSERT INTO `Artifact`( "
          "   `type_id`, `uri`, `state`, `name`, `create_time_since_epoch`, "
-         "   `last_update_time_since_epoch` "
-         ") VALUES($0, $1, $2, $3, $4, $5);"
-  parameter_num: 6
+         "   `last_update_time_since_epoch`, `registry_group` "
+         ") VALUES($0, $1, $2, $3, $4, $5, $6);"
+  parameter_num: 7
 )pb";
 
 static constexpr absl::string_view kSelectArtifactByIdForMySQL = R"pb(
@@ -99,9 +99,9 @@ static constexpr absl::string_view kUpdateArtifact = R"pb(
 static constexpr absl::string_view kInsertExecution = R"pb(
   query: " INSERT INTO `Execution`( "
          "   `type_id`, `last_known_state`, `name`, "
-         "   `create_time_since_epoch`, `last_update_time_since_epoch` "
-         ") VALUES($0, $1, $2, $3, $4);"
-  parameter_num: 5
+         "   `create_time_since_epoch`, `last_update_time_since_epoch`, `registry_group` "
+         ") VALUES($0, $1, $2, $3, $4, $5);"
+  parameter_num: 6
 )pb";
 
 static constexpr absl::string_view kSelectExecutionByIdForMySQL = R"pb(
@@ -141,9 +141,9 @@ static constexpr absl::string_view kUpdateExecution = R"pb(
 static constexpr absl::string_view kInsertContext = R"pb(
   query: " INSERT INTO `Context`( "
          "   `type_id`, `name`, "
-         "   `create_time_since_epoch`, `last_update_time_since_epoch` "
-         ") VALUES($0, $1, $2, $3);"
-  parameter_num: 4
+         "   `create_time_since_epoch`, `last_update_time_since_epoch`, `registry_group` "
+         ") VALUES($0, $1, $2, $3, $4);"
+  parameter_num: 5
 )pb";
 
 static constexpr absl::string_view kSelectContextByIdForMySQL = R"pb(
@@ -441,7 +441,8 @@ class QueryConfigExecutor : public QueryExecutor {
                               std::optional<absl::string_view> external_id,
                               const absl::Time create_time,
                               const absl::Time update_time,
-                              int64_t* artifact_id) final {
+                              int64_t* artifact_id,
+                              const std::optional<std::string>& registry_group) final {
     // TODO(b/248836219): Cleanup the fat-client after fully migrated to V9+.
     if (query_schema_version().has_value() &&
         query_schema_version().value() < kSchemaVersionNine) {
@@ -450,9 +451,10 @@ class QueryConfigExecutor : public QueryExecutor {
           entity_query::v7_and_v8::kInsertArtifact.data(), insert_artifact));
       return ExecuteQuerySelectLastInsertID(
           insert_artifact,
-          {Bind(type_id), Bind(artifact_uri), Bind(state), Bind(name),
+          {Bind(type_id), Bind(artifact_uri), Bind(state), Bind(name), 
            Bind(absl::ToUnixMillis(create_time)),
-           Bind(absl::ToUnixMillis(update_time))},
+           Bind(absl::ToUnixMillis(update_time)),
+           Bind(registry_group)},
           artifact_id);
     }
 
@@ -460,7 +462,8 @@ class QueryConfigExecutor : public QueryExecutor {
         query_config_.insert_artifact(),
         {Bind(type_id), Bind(artifact_uri), Bind(state), Bind(name),
          Bind(external_id), Bind(absl::ToUnixMillis(create_time)),
-         Bind(absl::ToUnixMillis(update_time))},
+         Bind(absl::ToUnixMillis(update_time)),
+         Bind(registry_group)},
         artifact_id);
   }
 
@@ -602,7 +605,7 @@ class QueryConfigExecutor : public QueryExecutor {
       const std::optional<std::string>& name,
       std::optional<absl::string_view> external_id,
       const absl::Time create_time, const absl::Time update_time,
-      int64_t* execution_id) final {
+      int64_t* execution_id, const std::optional<std::string>& registry_group) final {
     // TODO(b/248836219): Cleanup the fat-client after fully migrated to V9+.
     if (query_schema_version().has_value() &&
         query_schema_version().value() < kSchemaVersionNine) {
@@ -613,14 +616,16 @@ class QueryConfigExecutor : public QueryExecutor {
           insert_execution,
           {Bind(type_id), Bind(last_known_state), Bind(name),
            Bind(absl::ToUnixMillis(create_time)),
-           Bind(absl::ToUnixMillis(update_time))},
+           Bind(absl::ToUnixMillis(update_time)),
+           Bind(registry_group)},
           execution_id);
     }
     return ExecuteQuerySelectLastInsertID(
         query_config_.insert_execution(),
         {Bind(type_id), Bind(last_known_state), Bind(name), Bind(external_id),
          Bind(absl::ToUnixMillis(create_time)),
-         Bind(absl::ToUnixMillis(update_time))},
+         Bind(absl::ToUnixMillis(update_time)),
+         Bind(registry_group)},
         execution_id);
   }
 
@@ -757,7 +762,7 @@ class QueryConfigExecutor : public QueryExecutor {
                              std::optional<absl::string_view> external_id,
                              const absl::Time create_time,
                              const absl::Time update_time,
-                             int64_t* context_id) final {
+                             int64_t* context_id, const std::optional<std::string>& registry_group) final {
     // TODO(b/248836219): Cleanup the fat-client after fully migrated to V9+.
     if (query_schema_version().has_value() &&
         query_schema_version().value() < kSchemaVersionNine) {
@@ -767,14 +772,15 @@ class QueryConfigExecutor : public QueryExecutor {
       return ExecuteQuerySelectLastInsertID(
           insert_context,
           {Bind(type_id), Bind(name), Bind(absl::ToUnixMillis(create_time)),
-           Bind(absl::ToUnixMillis(update_time))},
+           Bind(absl::ToUnixMillis(update_time)), Bind(registry_group)},
           context_id);
     }
     return ExecuteQuerySelectLastInsertID(
         query_config_.insert_context(),
         {Bind(type_id), Bind(name), Bind(external_id),
          Bind(absl::ToUnixMillis(create_time)),
-         Bind(absl::ToUnixMillis(update_time))},
+         Bind(absl::ToUnixMillis(update_time)),
+         Bind(registry_group)},
         context_id);
   }
 

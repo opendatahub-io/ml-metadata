@@ -303,11 +303,9 @@ std::string QueryConfigExecutor::Bind(double value) {
 }
 
 std::string QueryConfigExecutor::Bind(const google::protobuf::Any& value) {
-  return absl::StrCat(
-      "'",
+  return
       metadata_source_->EscapeString(
-          metadata_source_->EncodeBytes(value.SerializeAsString())),
-      "'");
+          metadata_source_->EncodeBytes(value.SerializeAsString()));
 }
 
 std::string QueryConfigExecutor::Bind(bool value) { return value ? "1" : "0"; }

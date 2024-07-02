@@ -205,6 +205,7 @@ message MetadataSourceQueryConfig {
   // $2 is the name of the Artifact
   // $3 is the create_time_since_epoch of the Artifact
   // $4 is the last_update_time_since_epoch of the Artifact
+  // $5 is the registry_group of the Artifact
   TemplateQuery insert_artifact = 14;
 
   // Queries an artifact from the Artifact table by its id. It has 1 parameter.
@@ -287,6 +288,7 @@ message MetadataSourceQueryConfig {
   // $1 is the name of the execution
   // $2 is the create_time_since_epoch of the execution
   // $3 is the last_update_time_since_epoch of the execution
+  // $4 is the registry_group of the execution
   TemplateQuery insert_execution = 28;
 
   // Queries an execution from the Execution table by its id. It has 1
@@ -366,6 +368,7 @@ message MetadataSourceQueryConfig {
   // $1 is the name of the Context
   // $2 is the create_time_since_epoch of the Context
   // $3 is the last_update_time_since_epoch of the Context
+  // $4 is the registry_group of the Context
   TemplateQuery insert_context = 70;
 
   // Queries a context from the Context table by its id. It has 1 parameter.

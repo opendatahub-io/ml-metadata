@@ -169,12 +169,14 @@ class PostgreSQLQueryExecutor : public QueryExecutor {
                               std::optional<absl::string_view> external_id,
                               const absl::Time create_time,
                               const absl::Time update_time,
-                              int64_t* artifact_id) final {
+                              int64_t* artifact_id,
+                              const std::optional<std::string>& registry_group) final {
     return ExecuteQuerySelectLastInsertID(
         query_config_.insert_artifact(),
         {Bind(type_id), Bind(artifact_uri), Bind(state), Bind(name),
          Bind(external_id), Bind(absl::ToUnixMillis(create_time)),
-         Bind(absl::ToUnixMillis(update_time))},
+         Bind(absl::ToUnixMillis(update_time)),
+         Bind(registry_group)},
         artifact_id);
   }
 
@@ -266,12 +268,13 @@ class PostgreSQLQueryExecutor : public QueryExecutor {
       const std::optional<std::string>& name,
       std::optional<absl::string_view> external_id,
       const absl::Time create_time, const absl::Time update_time,
-      int64_t* execution_id) final {
+      int64_t* execution_id, const std::optional<std::string>& registry_group) final {
     return ExecuteQuerySelectLastInsertID(
         query_config_.insert_execution(),
         {Bind(type_id), Bind(last_known_state), Bind(name), Bind(external_id),
          Bind(absl::ToUnixMillis(create_time)),
-         Bind(absl::ToUnixMillis(update_time))},
+         Bind(absl::ToUnixMillis(update_time)),
+         Bind(registry_group)},
         execution_id);
   }
 
@@ -354,12 +357,13 @@ class PostgreSQLQueryExecutor : public QueryExecutor {
                              std::optional<absl::string_view> external_id,
                              const absl::Time create_time,
                              const absl::Time update_time,
-                             int64_t* context_id) final {
+                             int64_t* context_id, const std::optional<std::string>& registry_group) final {
     return ExecuteQuerySelectLastInsertID(
         query_config_.insert_context(),
         {Bind(type_id), Bind(name), Bind(external_id),
          Bind(absl::ToUnixMillis(create_time)),
-         Bind(absl::ToUnixMillis(update_time))},
+         Bind(absl::ToUnixMillis(update_time)),
+         Bind(registry_group)},
         context_id);
   }
 

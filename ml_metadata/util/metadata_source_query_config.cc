@@ -205,20 +205,21 @@ R"pb(
            "   `external_id` VARCHAR(255) UNIQUE, "
            "   `create_time_since_epoch` INT NOT NULL DEFAULT 0, "
            "   `last_update_time_since_epoch` INT NOT NULL DEFAULT 0, "
+           "   `registry_group` VARCHAR(255), "
            "   UNIQUE(`type_id`, `name`) "
            " ); "
   }
   check_artifact_table {
     query: " SELECT `id`, `type_id`, `uri`, `state`, `name`, "
-           "        `create_time_since_epoch`, `last_update_time_since_epoch` "
+           "        `create_time_since_epoch`, `last_update_time_since_epoch`, `registry_group` "
            " FROM `Artifact` LIMIT 1; "
   }
   insert_artifact {
     query: " INSERT INTO `Artifact`( "
            "   `type_id`, `uri`, `state`, `name`, `external_id`, "
-           "   `create_time_since_epoch`, `last_update_time_since_epoch` "
-           ") VALUES($0, $1, $2, $3, $4, $5, $6);"
-    parameter_num: 7
+           "   `create_time_since_epoch`, `last_update_time_since_epoch`, `registry_group` "
+           ") VALUES($0, $1, $2, $3, $4, $5, $6, $7);"
+    parameter_num: 8
   }
   select_artifact_by_id {
     query: " SELECT A.id, A.type_id, A.uri, A.state, A.name, "
@@ -226,7 +227,8 @@ R"pb(
            "        A.last_update_time_since_epoch, "
            "        T.name AS `type`, T.version AS type_version, "
            "        T.description AS type_description, "
-           "        T.external_id AS type_external_id "
+           "        T.external_id AS type_external_id, "
+           "        A.registry_group "
            " FROM `Artifact` AS A "
            " LEFT JOIN `Type` AS T "
            "   ON (T.id = A.type_id) "
@@ -324,20 +326,21 @@ R"pb(
            "   `external_id` VARCHAR(255) UNIQUE, "
            "   `create_time_since_epoch` INT NOT NULL DEFAULT 0, "
            "   `last_update_time_since_epoch` INT NOT NULL DEFAULT 0, "
+           "   `registry_group` VARCHAR(255), "
            "   UNIQUE(`type_id`, `name`) "
            " ); "
   }
   check_execution_table {
     query: " SELECT `id`, `type_id`, `last_known_state`, `name`, "
-           "        `create_time_since_epoch`, `last_update_time_since_epoch` "
+           "        `create_time_since_epoch`, `last_update_time_since_epoch`, `registry_group` "
            " FROM `Execution` LIMIT 1; "
   }
   insert_execution {
     query: " INSERT INTO `Execution`( "
            "   `type_id`, `last_known_state`, `name`, `external_id`, "
-           "   `create_time_since_epoch`, `last_update_time_since_epoch` "
-           ") VALUES($0, $1, $2, $3, $4, $5);"
-    parameter_num: 6
+           "   `create_time_since_epoch`, `last_update_time_since_epoch`, `registry_group` "
+           ") VALUES($0, $1, $2, $3, $4, $5, $6);"
+    parameter_num: 7
   }
   select_execution_by_id {
     query: " SELECT E.id, E.type_id, E.last_known_state, E.name, "
@@ -345,7 +348,8 @@ R"pb(
           "         E.last_update_time_since_epoch, "
           "         T.name AS `type`, T.version AS type_version, "
           "         T.description AS type_description, "
-          "         T.external_id AS type_external_id "
+          "         T.external_id AS type_external_id, "
+          "         E.registry_group "
           " FROM `Execution` AS E "
           " LEFT JOIN `Type` AS T "
           "   ON (T.id = E.type_id) "
@@ -439,27 +443,29 @@ R"pb(
            "   `external_id` VARCHAR(255) UNIQUE, "
            "   `create_time_since_epoch` INT NOT NULL DEFAULT 0, "
            "   `last_update_time_since_epoch` INT NOT NULL DEFAULT 0, "
+           "   `registry_group` VARCHAR(255), "
            "   UNIQUE(`type_id`, `name`) "
            " ); "
   }
   check_context_table {
     query: " SELECT `id`, `type_id`, `name`, "
-           "        `create_time_since_epoch`, `last_update_time_since_epoch` "
+           "        `create_time_since_epoch`, `last_update_time_since_epoch`, `registry_group` "
            " FROM `Context` LIMIT 1; "
   }
   insert_context {
     query: " INSERT INTO `Context`( "
            "   `type_id`, `name`, `external_id`, "
-           "   `create_time_since_epoch`, `last_update_time_since_epoch` "
-           ") VALUES($0, $1, $2, $3, $4);"
-    parameter_num: 5
+           "   `create_time_since_epoch`, `last_update_time_since_epoch`, `registry_group` "
+           ") VALUES($0, $1, $2, $3, $4, $5);"
+    parameter_num: 6
   }
   select_context_by_id {
     query: " SELECT C.id, C.type_id, C.name, C.external_id, "
            "        C.create_time_since_epoch, C.last_update_time_since_epoch, "
            "        T.name AS `type`, T.version AS type_version, "
            "        T.description AS type_description, "
-           "        T.external_id AS type_external_id "
+           "        T.external_id AS type_external_id, "
+           "        C.registry_group "
            " FROM `Context` AS C "
            " LEFT JOIN `Type` AS T ON (T.id = C.type_id) "
            " WHERE C.id IN ($0); "
@@ -1268,28 +1274,28 @@ R"pb(
         previous_version_setup_queries {
           query: " INSERT INTO `Artifact` "
                  " (`id`, `type_id`, `uri`, `state`, `name`, "
-                 "  `create_time_since_epoch`, `last_update_time_since_epoch`) "
-                 " VALUES (1, 2, 'uri1', 1, NULL, 0, 1); "
+                 "  `create_time_since_epoch`, `last_update_time_since_epoch`, `registry_group`) "
+                 " VALUES (1, 2, 'uri1', 1, NULL, 0, 1, NULL); "
         }
         previous_version_setup_queries {
           query: " INSERT INTO `Artifact` "
                  " (`id`, `type_id`, `uri`, `state`, `name`, "
-                 "  `create_time_since_epoch`, `last_update_time_since_epoch`) "
-                 " VALUES (2, 3, 'uri2', NULL, 'name2', 1, 0); "
+                 "  `create_time_since_epoch`, `last_update_time_since_epoch`, `registry_group`) "
+                 " VALUES (2, 3, 'uri2', NULL, 'name2', 1, 0, NULL); "
         }
         previous_version_setup_queries { query: "DELETE FROM `Execution`;" }
         previous_version_setup_queries {
           query: " INSERT INTO `Execution` "
                  " (`id`, `type_id`, `last_known_state`, `name`, "
-                 "  `create_time_since_epoch`, `last_update_time_since_epoch`) "
-                 " VALUES (1, 2, 1, NULL, 0, 1); "
+                 "  `create_time_since_epoch`, `last_update_time_since_epoch`, `registry_group`) "
+                 " VALUES (1, 2, 1, NULL, 0, 1, NULL); "
         }
         previous_version_setup_queries { query: "DELETE FROM `Context`;" }
         previous_version_setup_queries {
           query: " INSERT INTO `Context` "
                  " (`id`, `type_id`, `name`, "
-                 "  `create_time_since_epoch`, `last_update_time_since_epoch`) "
-                 " VALUES (1, 2, 'name1', 1, 0); "
+                 "  `create_time_since_epoch`, `last_update_time_since_epoch`, `registry_group`) "
+                 " VALUES (1, 2, 'name1', 1, 0, NULL); "
         }
         post_migration_verification_queries {
           query: " SELECT count(*) = 2 FROM `Artifact`; "
@@ -1342,6 +1348,7 @@ R"pb(
                "   `name` VARCHAR(255), "
                "   `create_time_since_epoch` INT NOT NULL DEFAULT 0, "
                "   `last_update_time_since_epoch` INT NOT NULL DEFAULT 0, "
+               "   `registry_group` VARCHAR(255), "
                "   UNIQUE(`type_id`, `name`) "
                " ); "
       }
@@ -1362,6 +1369,7 @@ R"pb(
                "   `name` VARCHAR(255), "
                "   `create_time_since_epoch` INT NOT NULL DEFAULT 0, "
                "   `last_update_time_since_epoch` INT NOT NULL DEFAULT 0, "
+               "   `registry_group` VARCHAR(255), "
                "   UNIQUE(`type_id`, `name`) "
                " ); "
       }
@@ -1382,6 +1390,11 @@ R"pb(
         query: " ALTER TABLE `Context` "
                " ADD COLUMN "
                "     `last_update_time_since_epoch` INT NOT NULL DEFAULT 0; "
+      }
+      upgrade_queries {
+        query: " ALTER TABLE `Context` "
+               " ADD COLUMN "
+               "     `registry_group` VARCHAR(255); "
       }
       # check the expected table columns are created properly.
       upgrade_verification {
@@ -1411,7 +1424,8 @@ R"pb(
           query: " SELECT count(*) = 1 FROM ( "
                  "   SELECT `id`, `type_id`, `uri`, `state`, `name`, "
                  "          `create_time_since_epoch`, "
-                 "          `last_update_time_since_epoch` "
+                 "          `last_update_time_since_epoch`, "
+                 "          `registry_group` "
                  "   FROM `Artifact` "
                  "   WHERE `id` = 1 AND `type_id` = 2 AND `uri` = 'uri1' AND "
                  "         `create_time_since_epoch` = 0 AND "
@@ -2237,6 +2251,7 @@ R"pb(
                "   `name` VARCHAR(255), "
                "   `create_time_since_epoch` INT NOT NULL DEFAULT 0, "
                "   `last_update_time_since_epoch` INT NOT NULL DEFAULT 0, "
+               "   `registry_group` VARCHAR(255), "
                "   UNIQUE(`type_id`, `name`) "
                " ); "
       }
@@ -2244,7 +2259,8 @@ R"pb(
         query: " INSERT INTO `ArtifactTemp` "
                " SELECT `id`, `type_id`, `uri`, `state`, `name`, "
                "        `create_time_since_epoch`, "
-               "        `last_update_time_since_epoch` "
+               "        `last_update_time_since_epoch`, "
+               "        `registry_group` "
                "FROM `Artifact`; "
       }
       downgrade_queries { query: " DROP TABLE `Artifact`; " }
@@ -2259,6 +2275,7 @@ R"pb(
                "   `name` VARCHAR(255), "
                "   `create_time_since_epoch` INT NOT NULL DEFAULT 0, "
                "   `last_update_time_since_epoch` INT NOT NULL DEFAULT 0, "
+               "   `registry_group` VARCHAR(255), "
                "   UNIQUE(`type_id`, `name`) "
                " ); "
       }
@@ -2266,7 +2283,8 @@ R"pb(
         query: " INSERT INTO `ExecutionTemp` "
                " SELECT `id`, `type_id`, `last_known_state`, `name`, "
                "        `create_time_since_epoch`, "
-               "        `last_update_time_since_epoch` "
+               "        `last_update_time_since_epoch`, "
+               "        `registry_group` "
                " FROM `Execution`; "
       }
       downgrade_queries { query: " DROP TABLE `Execution`; " }
@@ -2280,6 +2298,7 @@ R"pb(
                "   `name` VARCHAR(255) NOT NULL, "
                "   `create_time_since_epoch` INT NOT NULL DEFAULT 0, "
                "   `last_update_time_since_epoch` INT NOT NULL DEFAULT 0, "
+               "   `registry_group` VARCHAR(255), "
                "   UNIQUE(`type_id`, `name`) "
                " ); "
       }
@@ -2287,7 +2306,8 @@ R"pb(
         query: " INSERT INTO `ContextTemp` "
                " SELECT `id`, `type_id`, `name`, "
                "        `create_time_since_epoch`, "
-               "        `last_update_time_since_epoch` "
+               "        `last_update_time_since_epoch`, "
+               "        `registry_group` "
                " FROM `Context`; "
       }
       downgrade_queries { query: " DROP TABLE `Context`; " }
@@ -2346,22 +2366,22 @@ R"pb(
         previous_version_setup_queries {
           query: " INSERT INTO `Artifact` "
                  " (`id`, `type_id`, `uri`, `state`, `name`, `external_id`,"
-                 "  `create_time_since_epoch`, `last_update_time_since_epoch`) "
-                 " VALUES (1, 2, 'uri1', 1, NULL, 'artifact_1', 0, 1); "
+                 "  `create_time_since_epoch`, `last_update_time_since_epoch`, `registry_group`) "
+                 " VALUES (1, 2, 'uri1', 1, NULL, 'artifact_1', 0, 1, NULL); "
         }
         previous_version_setup_queries { query: "DELETE FROM `Execution`;" }
         previous_version_setup_queries {
           query: " INSERT INTO `Execution` "
                  " (`id`, `type_id`, `last_known_state`, `name`, `external_id`,"
-                 "  `create_time_since_epoch`, `last_update_time_since_epoch`) "
-                 " VALUES (1, 2, 1, NULL, 'execution_1', 0, 1); "
+                 "  `create_time_since_epoch`, `last_update_time_since_epoch`, `registry_group`) "
+                 " VALUES (1, 2, 1, NULL, 'execution_1', 0, 1, NULL); "
         }
         previous_version_setup_queries { query: "DELETE FROM `Context`;" }
         previous_version_setup_queries {
           query: " INSERT INTO `Context` "
                  " (`id`, `type_id`, `name`, `external_id`,"
-                 "  `create_time_since_epoch`, `last_update_time_since_epoch`) "
-                 " VALUES (1, 2, 'name1', 'context_1', 1, 0); "
+                 "  `create_time_since_epoch`, `last_update_time_since_epoch`, `registry_group`) "
+                 " VALUES (1, 2, 'name1', 'context_1', 1, 0, NULL); "
         }
         post_migration_verification_queries {
           query: " SELECT count(*) = 1 FROM `Type`; "
@@ -2446,16 +2466,18 @@ R"pb(
                "   `external_id` VARCHAR(255) UNIQUE, "
                "   `create_time_since_epoch` INT NOT NULL DEFAULT 0, "
                "   `last_update_time_since_epoch` INT NOT NULL DEFAULT 0, "
+               "   `registry_group` VARCHAR(255), "
                "   UNIQUE(`type_id`, `name`) "
                " ); "
       }
       upgrade_queries {
         query: " INSERT INTO `ArtifactTemp` (`id`, `type_id`, `uri`, `state`, "
                "        `name`, `create_time_since_epoch`, "
-               "        `last_update_time_since_epoch`) "
+               "        `last_update_time_since_epoch`, `registry_group`) "
                " SELECT `id`, `type_id`, `uri`, `state`, `name`, "
                "        `create_time_since_epoch`, "
-               "        `last_update_time_since_epoch` "
+               "        `last_update_time_since_epoch`, "
+               "        `registry_group` "
                "FROM `Artifact`; "
       }
       upgrade_queries { query: " DROP TABLE `Artifact`; " }
@@ -2471,6 +2493,7 @@ R"pb(
                "   `external_id` VARCHAR(255) UNIQUE, "
                "   `create_time_since_epoch` INT NOT NULL DEFAULT 0, "
                "   `last_update_time_since_epoch` INT NOT NULL DEFAULT 0, "
+               "   `registry_group` VARCHAR(255), "
                "   UNIQUE(`type_id`, `name`) "
                " ); "
       }
@@ -2478,10 +2501,10 @@ R"pb(
         query: " INSERT INTO `ExecutionTemp` (`id`, `type_id`, "
                "        `last_known_state`, `name`, "
                "        `create_time_since_epoch`, "
-               "        `last_update_time_since_epoch`) "
+               "        `last_update_time_since_epoch`, `registry_group`) "
                " SELECT `id`, `type_id`, `last_known_state`, `name`, "
                "        `create_time_since_epoch`, "
-               "        `last_update_time_since_epoch` "
+               "        `last_update_time_since_epoch`, `registry_group` "
                " FROM `Execution`; "
       }
       upgrade_queries { query: " DROP TABLE `Execution`; " }
@@ -2496,16 +2519,17 @@ R"pb(
                "   `external_id` VARCHAR(255) UNIQUE, "
                "   `create_time_since_epoch` INT NOT NULL DEFAULT 0, "
                "   `last_update_time_since_epoch` INT NOT NULL DEFAULT 0, "
+               "   `registry_group` VARCHAR(255), "
                "   UNIQUE(`type_id`, `name`) "
                " ); "
       }
       upgrade_queries {
         query: " INSERT INTO `ContextTemp` (`id`, `type_id`, `name`, "
                "        `create_time_since_epoch`, "
-               "        `last_update_time_since_epoch`) "
+               "        `last_update_time_since_epoch`, `registry_group`) "
                " SELECT `id`, `type_id`, `name`, "
                "        `create_time_since_epoch`, "
-               "        `last_update_time_since_epoch` "
+               "        `last_update_time_since_epoch`, `registry_group` "
                " FROM `Context`; "
       }
       upgrade_queries { query: " DROP TABLE `Context`; " }
@@ -2910,7 +2934,8 @@ R"pb(
            "        C.create_time_since_epoch, C.last_update_time_since_epoch, "
            "        T.name AS `type`, T.version AS type_version, "
            "        T.description AS type_description, "
-           "        T.external_id AS type_external_id "
+           "        T.external_id AS type_external_id, "
+           "        C.registry_group "
            " FROM `Context` AS C "
            " LEFT JOIN `Type` AS T ON (T.id = C.type_id) "
            " WHERE C.id IN ($0) LOCK IN SHARE MODE; "
@@ -2922,7 +2947,8 @@ R"pb(
            "        E.last_update_time_since_epoch, "
            "        T.name AS `type`, T.version AS type_version, "
            "        T.description AS type_description, "
-           "        T.external_id AS type_external_id "
+           "        T.external_id AS type_external_id, "
+           "        E.registry_group "
            " FROM `Execution` AS E "
            " LEFT JOIN `Type` AS T "
            "   ON (T.id = E.type_id) "
@@ -2935,7 +2961,8 @@ R"pb(
            "        A.last_update_time_since_epoch, "
            "        T.name AS `type`, T.version AS type_version, "
            "        T.description AS type_description, "
-           "        T.external_id AS type_external_id "
+           "        T.external_id AS type_external_id, "
+           "        A.registry_owner "
            " FROM `Artifact` AS A "
            " LEFT JOIN `Type` AS T "
            "   ON (T.id = A.type_id) "
@@ -2970,6 +2997,7 @@ R"pb(
            "   `external_id` VARCHAR(255) UNIQUE, "
            "   `create_time_since_epoch` BIGINT NOT NULL DEFAULT 0, "
            "   `last_update_time_since_epoch` BIGINT NOT NULL DEFAULT 0, "
+           "   `registry_group` VARCHAR(255), "
            "   CONSTRAINT UniqueArtifactTypeName UNIQUE(`type_id`, `name`) "
            " ); "
   }
@@ -2995,6 +3023,7 @@ R"pb(
            "   `external_id` VARCHAR(255) UNIQUE, "
            "   `create_time_since_epoch` BIGINT NOT NULL DEFAULT 0, "
            "   `last_update_time_since_epoch` BIGINT NOT NULL DEFAULT 0, "
+           "   `registry_group` VARCHAR(255), "
            "   CONSTRAINT UniqueExecutionTypeName UNIQUE(`type_id`, `name`) "
            " ); "
   }
@@ -3019,6 +3048,7 @@ R"pb(
            "   `external_id` VARCHAR(255) UNIQUE, "
            "   `create_time_since_epoch` BIGINT NOT NULL DEFAULT 0, "
            "   `last_update_time_since_epoch` BIGINT NOT NULL DEFAULT 0, "
+           "   `registry_group` VARCHAR(255) "
            "   UNIQUE(`type_id`, `name`) "
            " ); "
   }
@@ -3462,7 +3492,8 @@ R"pb(
                " DROP COLUMN `state`, "
                " DROP COLUMN `name`, "
                " DROP COLUMN `create_time_since_epoch`, "
-               " DROP COLUMN `last_update_time_since_epoch`; "
+               " DROP COLUMN `last_update_time_since_epoch`, "
+               " DROP COLUMN `registry_group`; "
       }
       downgrade_queries {
         query: " ALTER TABLE `Execution` "
@@ -3473,12 +3504,14 @@ R"pb(
                " DROP COLUMN `last_known_state`, "
                " DROP COLUMN `name`, "
                " DROP COLUMN `create_time_since_epoch`, "
-               " DROP COLUMN `last_update_time_since_epoch`; "
+               " DROP COLUMN `last_update_time_since_epoch`, "
+               " DROP COLUMN `registry_group`; "
       }
       downgrade_queries {
         query: " ALTER TABLE `Context` "
                " DROP COLUMN `create_time_since_epoch`, "
-               " DROP COLUMN `last_update_time_since_epoch`; "
+               " DROP COLUMN `last_update_time_since_epoch`, "
+               " DROP COLUMN `registry_group`; "
       }
       # verify if the downgrading keeps the existing columns
       downgrade_verification {
@@ -3486,28 +3519,28 @@ R"pb(
         previous_version_setup_queries {
           query: " INSERT INTO `Artifact` "
                  " (`id`, `type_id`, `uri`, `state`, `name`, "
-                 "  `create_time_since_epoch`, `last_update_time_since_epoch`) "
-                 " VALUES (1, 2, 'uri1', 1, NULL, 0, 1); "
+                 "  `create_time_since_epoch`, `last_update_time_since_epoch`, `registry_group`) "
+                 " VALUES (1, 2, 'uri1', 1, NULL, 0, 1, NULL); "
         }
         previous_version_setup_queries {
           query: " INSERT INTO `Artifact` "
                  " (`id`, `type_id`, `uri`, `state`, `name`, "
-                 "  `create_time_since_epoch`, `last_update_time_since_epoch`) "
-                 " VALUES (2, 3, 'uri2', NULL, 'name2', 1, 0); "
+                 "  `create_time_since_epoch`, `last_update_time_since_epoch`, `registry_group`) "
+                 " VALUES (2, 3, 'uri2', NULL, 'name2', 1, 0, NULL); "
         }
         previous_version_setup_queries { query: "DELETE FROM `Execution`;" }
         previous_version_setup_queries {
           query: " INSERT INTO `Execution` "
                  " (`id`, `type_id`, `last_known_state`, `name`, "
-                 "  `create_time_since_epoch`, `last_update_time_since_epoch`) "
-                 " VALUES (1, 2, 1, NULL, 0, 1); "
+                 "  `create_time_since_epoch`, `last_update_time_since_epoch`, `registry_group`) "
+                 " VALUES (1, 2, 1, NULL, 0, 1, NULL); "
         }
         previous_version_setup_queries { query: "DELETE FROM `Context`;" }
         previous_version_setup_queries {
           query: " INSERT INTO `Context` "
                  " (`id`, `type_id`, `name`, "
-                 "  `create_time_since_epoch`, `last_update_time_since_epoch`) "
-                 " VALUES (1, 2, 'name1', 1, 0); "
+                 "  `create_time_since_epoch`, `last_update_time_since_epoch`, `registry_group`) "
+                 " VALUES (1, 2, 'name1', 1, 0, NULL); "
         }
         post_migration_verification_queries {
           query: " SELECT count(*) = 2 FROM `Artifact`; "
@@ -3553,7 +3586,8 @@ R"pb(
                "   `state` INT, "
                "   `name` VARCHAR(255), "
                "   `create_time_since_epoch` BIGINT NOT NULL DEFAULT 0, "
-               "   `last_update_time_since_epoch` BIGINT NOT NULL DEFAULT 0 "
+               "   `last_update_time_since_epoch` BIGINT NOT NULL DEFAULT 0, "
+               "   `registry_group` VARCHAR(255) "
                " ), "
                " ADD CONSTRAINT UniqueArtifactTypeName "
                " UNIQUE(`type_id`, `name`); "
@@ -3564,7 +3598,8 @@ R"pb(
                "   `last_known_state` INT, "
                "   `name` VARCHAR(255), "
                "   `create_time_since_epoch` BIGINT NOT NULL DEFAULT 0, "
-               "   `last_update_time_since_epoch` BIGINT NOT NULL DEFAULT 0 "
+               "   `last_update_time_since_epoch` BIGINT NOT NULL DEFAULT 0, "
+               "   `registry_group` VARCHAR(255) "
                " ), "
                " ADD CONSTRAINT UniqueExecutionTypeName "
                " UNIQUE(`type_id`, `name`); "
@@ -3573,7 +3608,8 @@ R"pb(
       upgrade_queries {
         query: " ALTER TABLE `Context` ADD ( "
                "   `create_time_since_epoch` BIGINT NOT NULL DEFAULT 0, "
-               "   `last_update_time_since_epoch` BIGINT NOT NULL DEFAULT 0 "
+               "   `last_update_time_since_epoch` BIGINT NOT NULL DEFAULT 0, "
+               "   `registry_group` VARCHAR(255) "
                " ) "
       }
       # check the expected table columns are created properly.
@@ -3604,7 +3640,8 @@ R"pb(
           query: " SELECT count(*) = 1 FROM ( "
                  "   SELECT `id`, `type_id`, `uri`, `state`, `name`, "
                  "          `create_time_since_epoch`, "
-                 "          `last_update_time_since_epoch` "
+                 "          `last_update_time_since_epoch`, "
+                 "          `registry_group` "
                  "   FROM `Artifact` "
                  "   WHERE `id` = 1 AND `type_id` = 2 AND `uri` = 'uri1' AND "
                  "         `create_time_since_epoch` = 0 AND "
@@ -3626,7 +3663,8 @@ R"pb(
           query: " SELECT count(*) = 1 FROM ( "
                  "   SELECT `id`, `type_id`, `name`, "
                  "          `create_time_since_epoch`, "
-                 "          `last_update_time_since_epoch` "
+                 "          `last_update_time_since_epoch`, "
+                 "          `registry_group` "
                  "   FROM `Context` "
                  "   WHERE `id` = 1 AND `type_id` = 2 AND `name` = 'name1' AND "
                  "         `create_time_since_epoch` = 0 AND "
@@ -4401,22 +4439,22 @@ R"pb(
         previous_version_setup_queries {
           query: " INSERT INTO `Artifact` "
                  " (`id`, `type_id`, `uri`, `state`, `name`, `external_id`, "
-                 "  `create_time_since_epoch`, `last_update_time_since_epoch`) "
-                 " VALUES (1, 2, 'uri1', 1, NULL, 'artifact_1', 0, 1); "
+                 "  `create_time_since_epoch`, `last_update_time_since_epoch`, `registry_group`) "
+                 " VALUES (1, 2, 'uri1', 1, NULL, 'artifact_1', 0, 1, NULL); "
         }
         previous_version_setup_queries { query: "DELETE FROM `Execution`;" }
         previous_version_setup_queries {
           query: " INSERT INTO `Execution` "
                  " (`id`, `type_id`, `last_known_state`, `name`, `external_id`,"
-                 "  `create_time_since_epoch`, `last_update_time_since_epoch`) "
-                 " VALUES (1, 2, 1, NULL, 'execution_1', 0, 1); "
+                 "  `create_time_since_epoch`, `last_update_time_since_epoch`, `registry_group`) "
+                 " VALUES (1, 2, 1, NULL, 'execution_1', 0, 1, NULL); "
         }
         previous_version_setup_queries { query: "DELETE FROM `Context`;" }
         previous_version_setup_queries {
           query: " INSERT INTO `Context` "
                  " (`id`, `type_id`, `name`, `external_id`, "
-                 "  `create_time_since_epoch`, `last_update_time_since_epoch`) "
-                 " VALUES (1, 2, 'name1', 'context_1', 1, 0); "
+                 "  `create_time_since_epoch`, `last_update_time_since_epoch`, `registry_group`) "
+                 " VALUES (1, 2, 'name1', 'context_1', 1, 0, NULL); "
         }
         post_migration_verification_queries {
           query: " SELECT count(*) = 1 FROM `Type`; "
@@ -4934,9 +4972,9 @@ R"pb(
   insert_artifact {
     query: " INSERT INTO Artifact( "
            "   type_id, uri, state, name, external_id, "
-           "   create_time_since_epoch, last_update_time_since_epoch "
-           ") VALUES($0, $1, $2, $3, $4, $5, $6)"
-    parameter_num: 7
+           "   create_time_since_epoch, last_update_time_since_epoch, registry_group "
+           ") VALUES($0, $1, $2, $3, $4, $5, $6, $7)"
+    parameter_num: 8
   }
   select_artifact_by_id {
     query: " SELECT A.id, A.type_id, A.uri, A.state, A.name, "
@@ -6027,7 +6065,8 @@ R"pb(
                " DROP COLUMN state, "
                " DROP COLUMN name, "
                " DROP COLUMN create_time_since_epoch, "
-               " DROP COLUMN last_update_time_since_epoch; "
+               " DROP COLUMN last_update_time_since_epoch, "
+               " DROP COLUMN registry_group; "
       }
       downgrade_queries {
         query: " ALTER TABLE Execution DROP CONSTRAINT UniqueExecutionTypeName; "
@@ -6037,12 +6076,14 @@ R"pb(
                " DROP COLUMN last_known_state, "
                " DROP COLUMN name, "
                " DROP COLUMN create_time_since_epoch, "
-               " DROP COLUMN last_update_time_since_epoch; "
+               " DROP COLUMN last_update_time_since_epoch, "
+               " DROP COLUMN registry_group; "
       }
       downgrade_queries {
         query: " ALTER TABLE Context "
                " DROP COLUMN create_time_since_epoch, "
-               " DROP COLUMN last_update_time_since_epoch; "
+               " DROP COLUMN last_update_time_since_epoch, "
+               " DROP COLUMN registry_group; "
       }
       # verify if the downgrading keeps the existing columns
       downgrade_verification {
@@ -6123,6 +6164,7 @@ R"pb(
                 "ADD COLUMN create_time_since_epoch BIGINT NOT NULL DEFAULT 0,"
                 "ADD COLUMN "
                 " last_update_time_since_epoch BIGINT NOT NULL DEFAULT 0,"
+                "ADD COLUMN registry_group VARCHAR(255),"
                 "ADD CONSTRAINT UniqueArtifactTypeName UNIQUE (type_id, name);"
       }
       # upgrade Execution table

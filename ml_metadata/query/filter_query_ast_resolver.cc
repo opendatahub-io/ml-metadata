@@ -292,7 +292,8 @@ absl::Status AddContextsImpl(absl::string_view query_string,
          {"name", StringType()},
          {"type", StringType()},
          {"create_time_since_epoch", Int64Type()},
-         {"last_update_time_since_epoch", Int64Type()}},
+         {"last_update_time_since_epoch", Int64Type()},
+         {"registry_group", StringType()}},
         &context_struct_type));
     MLMD_RETURN_IF_ERROR(analyzer_opts.AddExpressionColumn(
         matched_context, context_struct_type));
@@ -323,7 +324,8 @@ absl::Status AddArtifactsImpl(absl::string_view query_string,
          {"uri", StringType()},
          {"external_id", StringType()},
          {"create_time_since_epoch", Int64Type()},
-         {"last_update_time_since_epoch", Int64Type()}},
+         {"last_update_time_since_epoch", Int64Type()},
+         {"registry_group", StringType()}},
         &artifact_struct_type));
     MLMD_RETURN_IF_ERROR(analyzer_opts.AddExpressionColumn(
         matched_artifact, artifact_struct_type));
@@ -353,7 +355,8 @@ absl::Status AddExecutionsImpl(absl::string_view query_string,
          {"last_known_state", Int64Type()},
          {"external_id", StringType()},
          {"create_time_since_epoch", Int64Type()},
-         {"last_update_time_since_epoch", Int64Type()}},
+         {"last_update_time_since_epoch", Int64Type()},
+         {"registry_group", StringType()}},
         &execution_struct_type));
     MLMD_RETURN_IF_ERROR(analyzer_opts.AddExpressionColumn(
         matched_execution, execution_struct_type));
