@@ -521,7 +521,7 @@ std::vector<Event> FilterEventsByDirectionAndEventType(
 
 
 // Creates an Artifact (without properties).
-absl::Status RDBMSMetadataAccessObject::CreateBasicNode( // FIXME: MAIN CHANGE, add registry_group here
+absl::Status RDBMSMetadataAccessObject::CreateBasicNode(
     const Artifact& artifact, const absl::Time create_timestamp,
     int64_t* node_id) {
   return executor_->InsertArtifact(
@@ -1153,7 +1153,7 @@ absl::Status RDBMSMetadataAccessObject::FindParentTypesByTypeIdImpl(
 // Returns INVALID_ARGUMENT error, if the node does not align with its type.
 // Returns detailed INTERNAL error, if query execution fails.
 template <typename Node, typename NodeType>
-absl::Status RDBMSMetadataAccessObject::CreateNodeImpl( // FIXME: Update this
+absl::Status RDBMSMetadataAccessObject::CreateNodeImpl(
     const Node& node, const bool skip_type_and_property_validation,
     const absl::Time create_timestamp, int64_t* node_id) {
   // clear node id
@@ -1733,10 +1733,10 @@ absl::Status RDBMSMetadataAccessObject::FindParentTypesByTypeId(
   return FindParentTypesByTypeIdImpl(type_ids, output_parent_types);
 }
 
-absl::Status RDBMSMetadataAccessObject::CreateArtifact( // FIXME: Update this
+absl::Status RDBMSMetadataAccessObject::CreateArtifact(
     const Artifact& artifact, const bool skip_type_and_property_validation,
     int64_t* artifact_id) {
-  const absl::Status& status = CreateNodeImpl<Artifact, ArtifactType>( // FIXME: Update this
+  const absl::Status& status = CreateNodeImpl<Artifact, ArtifactType>(
       artifact, skip_type_and_property_validation, absl::Now(), artifact_id);
   if (IsUniqueConstraintViolated(status)) {
     return absl::AlreadyExistsError(

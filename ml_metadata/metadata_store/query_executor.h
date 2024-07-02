@@ -287,7 +287,7 @@ class QueryExecutor {
       const std::optional<Artifact::State>& state,
       const std::optional<std::string>& name,
       std::optional<absl::string_view> external_id, absl::Time create_time,
-      absl::Time update_time, int64_t* artifact_id, const std::optional<std::string>& registry_group = absl::nullopt) = 0;
+      absl::Time update_time, int64_t* artifact_id, const std::optional<std::string>& registry_group) = 0;
 
   // Gets artifacts from the database by their ids. Not found ids are
   // skipped. For each matched artifact, returns a row that contains the
@@ -364,7 +364,7 @@ class QueryExecutor {
       int64_t type_id, const std::optional<Execution::State>& last_known_state,
       const std::optional<std::string>& name,
       std::optional<absl::string_view> external_id, absl::Time create_time,
-      absl::Time update_time, int64_t* execution_id, const std::optional<std::string>& registry_group = absl::nullopt) = 0;
+      absl::Time update_time, int64_t* execution_id, const std::optional<std::string>& registry_group) = 0;
 
   // Gets Executions based on the given ids. Not found ids are skipped.
   // For each matched execution, returns a row that contains the following
@@ -434,7 +434,7 @@ class QueryExecutor {
       int64_t type_id, const std::string& name,
       std::optional<absl::string_view> external_id,
       const absl::Time create_time, const absl::Time update_time,
-      int64_t* context_id, const std::optional<std::string>& registry_group = absl::nullopt) = 0;
+      int64_t* context_id, const std::optional<std::string>& registry_group) = 0;
 
   // Gets contexts from the database by their ids. For each context,
   // returns a row that contains the following columns (order not important):
