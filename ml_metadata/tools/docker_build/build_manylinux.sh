@@ -49,6 +49,7 @@ function setup_environment() {
   # Auditwheel does not have a python2 version and auditwheel is just a binary.
   ${PIP_BIN} install auditwheel
   sudo ln -s ${PYTHON_BIN_PATH} /usr/bin/python3
+  yum install openssl-devel -y
 }
 
 function build_wheel() {
