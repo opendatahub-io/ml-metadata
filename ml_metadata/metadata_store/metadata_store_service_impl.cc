@@ -493,8 +493,10 @@ MetadataStoreServiceImpl::MetadataStoreServiceImpl(
                  << connection_status.error_message();
     return connection_status;
   }
+  const std::multimap<grpc::string_ref, grpc::string_ref> MetadataContext =
+        context->client_metadata();
   const ::grpc::Status transaction_status =
-      ToGRPCStatus(metadata_store->GetArtifactsByType(*request, response));
+      ToGRPCStatus(metadata_store->GetArtifactsByType(&MetadataContext, *request, response));
   if (!transaction_status.ok()) {
     LOG(WARNING) << "GetArtifactsByType failed: "
                  << transaction_status.error_message();

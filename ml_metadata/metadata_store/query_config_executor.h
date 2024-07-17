@@ -506,9 +506,10 @@ class QueryConfigExecutor : public QueryExecutor {
   }
 
   absl::Status SelectArtifactsByTypeID(int64_t artifact_type_id,
+                                       absl::string_view group,
                                        RecordSet* record_set) final {
     return ExecuteQuery(query_config_.select_artifacts_by_type_id(),
-                        {Bind(artifact_type_id)}, record_set);
+                        {Bind(artifact_type_id), Bind(group)}, record_set);
   }
 
   absl::Status SelectArtifactsByURI(absl::string_view uri,

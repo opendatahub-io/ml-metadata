@@ -320,6 +320,7 @@ class QueryExecutor {
   // Gets artifacts from the Artifact table by their type_id.
   // Returns a list of artifact IDs.
   virtual absl::Status SelectArtifactsByTypeID(int64_t artifact_type_id,
+                                               absl::string_view group,
                                                RecordSet* record_set) = 0;
 
   // Gets an artifact from the database by its uri.

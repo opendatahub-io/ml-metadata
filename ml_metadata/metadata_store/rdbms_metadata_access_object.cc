@@ -2632,11 +2632,11 @@ absl::Status RDBMSMetadataAccessObject::FindArtifactByTypeIdAndArtifactName(
 }
 
 absl::Status RDBMSMetadataAccessObject::FindArtifactsByTypeId(
-    const int64_t type_id, std::optional<ListOperationOptions> list_options,
+    const int64_t type_id, absl::string_view group, std::optional<ListOperationOptions> list_options,
     std::vector<Artifact>* artifacts, std::string* next_page_token) {
   RecordSet record_set;
   MLMD_RETURN_IF_ERROR(
-      executor_->SelectArtifactsByTypeID(type_id, &record_set));
+      executor_->SelectArtifactsByTypeID(type_id, group, &record_set));
   const std::vector<int64_t> ids = ConvertToIds(record_set);
   if (ids.empty()) {
     return absl::NotFoundError(

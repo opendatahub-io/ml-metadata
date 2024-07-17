@@ -305,6 +305,7 @@ class RDBMSMetadataAccessObject : public MetadataAccessObject {
 
   absl::Status FindArtifactsByTypeId(
       int64_t artifact_type_id,
+      absl::string_view group,
       std::optional<ListOperationOptions> list_options,
       std::vector<Artifact>* artifacts, std::string* next_page_token) final;
 

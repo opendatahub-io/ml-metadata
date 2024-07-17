@@ -352,6 +352,7 @@ class MetadataStore : public MetadataStoreServiceInterface {
   // OK and empty response.
   // Returns detailed INTERNAL error, if query execution fails.
   absl::Status GetArtifactsByType(
+      const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
       const GetArtifactsByTypeRequest& request,
       GetArtifactsByTypeResponse* response) override;
 

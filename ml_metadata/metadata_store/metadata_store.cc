@@ -1759,10 +1759,11 @@ absl::Status MetadataStore::GetArtifactsByURI(
 }
 
 absl::Status MetadataStore::GetArtifactsByType(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
     const GetArtifactsByTypeRequest& request,
     GetArtifactsByTypeResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
         int64_t artifact_type_id;
         absl::Status status =
@@ -1774,10 +1775,13 @@ absl::Status MetadataStore::GetArtifactsByType(
         } else if (!status.ok()) {
           return status;
         }
+        std::string group = "";
+        std::multimap<grpc::string_ref, grpc::string_ref>::const_iterator itr;
         std::vector<Artifact> artifacts;
         std::string next_page_token;
         status = metadata_access_object_->FindArtifactsByTypeId(
             artifact_type_id,
+            group,
             (request.has_options() ? absl::make_optional(request.options())
                                    : absl::nullopt),
             &artifacts, &next_page_token);

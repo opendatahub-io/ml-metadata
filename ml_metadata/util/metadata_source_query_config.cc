@@ -240,8 +240,8 @@ R"pb(
     parameter_num: 2
   }
   select_artifacts_by_type_id {
-    query: " SELECT `id` from `Artifact` WHERE `type_id` = $0; "
-    parameter_num: 1
+    query: " SELECT `id` from `Artifact` WHERE `type_id` = $0 and `registry_group` = $1; "
+    parameter_num: 2
   }
   select_artifacts_by_uri {
     query: " SELECT `id` from `Artifact` WHERE `uri` = $0; "
@@ -4954,6 +4954,7 @@ R"pb(
            "   external_id VARCHAR(255) UNIQUE, "
            "   create_time_since_epoch BIGINT NOT NULL DEFAULT 0, "
            "   last_update_time_since_epoch BIGINT NOT NULL DEFAULT 0, "
+           "   registry_group VARCHAR(255), "
            "   CONSTRAINT UniqueArtifactTypeName UNIQUE(type_id, name) "
            " ); "
   }
@@ -4964,8 +4965,8 @@ R"pb(
            "   WHERE  table_name = 'artifact'"
            "      AND column_name IN ('id', 'type_id', 'uri',"
            "                'state', 'name', 'create_time_since_epoch',"
-           "                'last_update_time_since_epoch')"
-           "   ) = 7"
+           "                'last_update_time_since_epoch', 'registry_group')"
+           "   ) = 8"
            " )::int AS table_exists;"
   }
   # After insertion, return id for the new inserted Artifact.
@@ -4982,7 +4983,8 @@ R"pb(
            " A.last_update_time_since_epoch, "
            " T.name AS type, T.version AS type_version, "
            " T.description AS type_description, "
-           " T.external_id AS type_external_id "
+           " T.external_id AS type_external_id, "
+           " A.registry_group "
            " FROM Artifact AS A "
            " LEFT JOIN Type AS T "
            "    ON (T.id = A.type_id) "
@@ -4994,8 +4996,8 @@ R"pb(
     parameter_num: 2
   }
   select_artifacts_by_type_id {
-    query: " SELECT id FROM Artifact WHERE type_id = $0; "
-    parameter_num: 1
+    query: " SELECT id FROM Artifact WHERE type_id = $0 and registry_group = $1; "
+    parameter_num: 2
   }
   select_artifacts_by_uri {
     query: " SELECT id FROM Artifact WHERE uri = $0; "
@@ -5008,9 +5010,9 @@ R"pb(
   update_artifact {
     query: " UPDATE Artifact "
            " SET type_id = $1, uri = $2, state = $3, external_id = $4, "
-           "     last_update_time_since_epoch = $5 "
+           "     last_update_time_since_epoch = $5, registry_group = $6 "
            " WHERE id = $0;"
-    parameter_num: 6
+    parameter_num: 7
   }
   drop_artifact_property_table {
     query: " DROP TABLE IF EXISTS ArtifactProperty; "
@@ -5086,6 +5088,7 @@ R"pb(
            "   external_id VARCHAR(255) UNIQUE, "
            "   create_time_since_epoch BIGINT NOT NULL DEFAULT 0, "
            "   last_update_time_since_epoch BIGINT NOT NULL DEFAULT 0, "
+           "   registry_group VARCHAR(255), "
            "   CONSTRAINT UniqueExecutionTypeName UNIQUE(type_id, name) "
            " ); "
   }
@@ -5096,16 +5099,16 @@ R"pb(
            "   WHERE  table_name = 'execution'"
            "      AND column_name IN ('id', 'type_id', "
            "        'last_known_state', 'name', 'create_time_since_epoch',"
-           "        'last_update_time_since_epoch')"
-           "   ) = 6"
+           "        'last_update_time_since_epoch', 'registry_group')"
+           "   ) = 7"
            " )::int AS table_exists;"
   }
   insert_execution {
     query: " INSERT INTO Execution( "
            "   type_id, last_known_state, name, external_id, "
-           "   create_time_since_epoch, last_update_time_since_epoch "
-           ") VALUES($0, $1, $2, $3, $4, $5)"
-    parameter_num: 6
+           "   create_time_since_epoch, last_update_time_since_epoch, registry_group "
+           ") VALUES($0, $1, $2, $3, $4, $5, $6)"
+    parameter_num: 7
   }
   select_execution_by_id {
     query: " SELECT E.id, E.type_id, E.last_known_state, E.name, "
@@ -5113,7 +5116,8 @@ R"pb(
            "        E.last_update_time_since_epoch, T.name AS type, "
            "        T.version AS type_version, "
            "        T.description AS type_description, "
-           "        T.external_id AS type_external_id "
+           "        T.external_id AS type_external_id, "
+           "        E.registry_group "
            " FROM Execution AS E "
            " LEFT JOIN Type AS T "
            "        ON (T.id = E.type_id) "
@@ -5136,9 +5140,9 @@ R"pb(
     query: " UPDATE Execution "
            " SET type_id = $1, last_known_state = $2, "
            "     external_id = $3, "
-           "     last_update_time_since_epoch = $4 "
+           "     last_update_time_since_epoch = $4, registry_group = $5 "
            " WHERE id = $0;"
-    parameter_num: 5
+    parameter_num: 6
   }
   drop_execution_property_table {
     query: " DROP TABLE IF EXISTS ExecutionProperty; "
@@ -5213,6 +5217,7 @@ R"pb(
            "   external_id VARCHAR(255) UNIQUE, "
            "   create_time_since_epoch BIGINT NOT NULL DEFAULT 0, "
            "   last_update_time_since_epoch BIGINT NOT NULL DEFAULT 0, "
+           "   registry_group VARCHAR(255), "
            "   UNIQUE(type_id, name) "
            " ); "
   }
@@ -5223,23 +5228,24 @@ R"pb(
            "   WHERE  table_name = 'context'"
            "      AND column_name IN ('id', 'type_id', "
            "        'name', 'create_time_since_epoch', "
-           "        'last_update_time_since_epoch')"
-           "   ) = 5"
+           "        'last_update_time_since_epoch', 'registry_group')"
+           "   ) = 6"
            " )::int AS table_exists;"
   }
   insert_context {
     query: " INSERT INTO Context( "
            "   type_id, name, external_id, "
-           "   create_time_since_epoch, last_update_time_since_epoch "
-           ") VALUES($0, $1, $2, $3, $4);"
-    parameter_num: 5
+           "   create_time_since_epoch, last_update_time_since_epoch, registry_group "
+           ") VALUES($0, $1, $2, $3, $4, $5);"
+    parameter_num: 6
   }
   select_context_by_id {
     query: " SELECT C.id, C.type_id, C.name, C.external_id, "
            " C.create_time_since_epoch, C.last_update_time_since_epoch, "
            " T.name AS type, T.version AS type_version, "
            " T.description AS type_description, "
-           " T.external_id AS type_external_id "
+           " T.external_id AS type_external_id, "
+           " C.registry_group "
            " FROM Context AS C "
            " LEFT JOIN Type AS T ON (T.id = C.type_id) "
            " WHERE C.id IN ($0); "
@@ -5260,9 +5266,9 @@ R"pb(
   update_context {
     query: " UPDATE Context "
            " SET type_id = $1, name = $2, external_id = $3, "
-           "     last_update_time_since_epoch = $4 "
+           "     last_update_time_since_epoch = $4, registry_group = $5 "
            " WHERE id = $0;"
-    parameter_num: 5
+    parameter_num: 6
   }
   drop_context_property_table {
     query: " DROP TABLE IF EXISTS ContextProperty; "

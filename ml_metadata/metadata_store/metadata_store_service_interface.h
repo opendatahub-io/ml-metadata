@@ -17,6 +17,7 @@ limitations under the License.
 
 #include "absl/status/status.h"
 #include "ml_metadata/proto/metadata_store_service.pb.h"
+#include <grpcpp/grpcpp.h>
 
 namespace ml_metadata {
 
@@ -29,6 +30,13 @@ class MetadataStoreServiceInterface {
 
 #define METADATA_STORE_SERVICE_INTERFACE_DECLARE(method)      \
   virtual absl::Status method(const method##Request& request, \
+                              method##Response* response) {   \
+    return absl::UnimplementedError(#method);                 \
+  }
+
+#define METADATA_STORE_SERVICE_INTERFACE_DECLARE_2(method)      \
+  virtual absl::Status method(const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext, \
+                              const method##Request& request, \
                               method##Response* response) {   \
     return absl::UnimplementedError(#method);                 \
   }
@@ -63,7 +71,7 @@ class MetadataStoreServiceInterface {
   METADATA_STORE_SERVICE_INTERFACE_DECLARE(GetArtifactsByID)
   METADATA_STORE_SERVICE_INTERFACE_DECLARE(GetExecutionsByID)
   METADATA_STORE_SERVICE_INTERFACE_DECLARE(GetContextsByID)
-  METADATA_STORE_SERVICE_INTERFACE_DECLARE(GetArtifactsByType)
+  METADATA_STORE_SERVICE_INTERFACE_DECLARE_2(GetArtifactsByType)
   METADATA_STORE_SERVICE_INTERFACE_DECLARE(GetArtifactByTypeAndName)
   METADATA_STORE_SERVICE_INTERFACE_DECLARE(GetArtifactsByExternalIds)
   METADATA_STORE_SERVICE_INTERFACE_DECLARE(GetExecutionsByType)
