@@ -400,7 +400,7 @@ class MetadataAccessObject {
   // Returns detailed INTERNAL error, if query execution fails.
   virtual absl::Status FindArtifactsByTypeId(
       int64_t artifact_type_id,
-      absl::string_view group,
+      absl::Span<std::string> groups,
       std::optional<ListOperationOptions> list_options,
       std::vector<Artifact>* artifacts, std::string* next_page_token) = 0;
 
@@ -563,6 +563,7 @@ class MetadataAccessObject {
   // Returns detailed INTERNAL error, if query execution fails.
   virtual absl::Status FindExecutionsByTypeId(
       int64_t execution_type_id,
+      absl::Span<std::string> groups,
       std::optional<ListOperationOptions> list_options,
       std::vector<Execution>* executions, std::string* next_page_token) = 0;
 
@@ -715,7 +716,7 @@ class MetadataAccessObject {
   // Returns NOT_FOUND error, if no context can be found.
   // Returns detailed INTERNAL error, if query execution fails.
   virtual absl::Status FindContextsByTypeId(
-      int64_t type_id, std::optional<ListOperationOptions> list_options,
+      int64_t type_id, absl::Span<std::string> groups, std::optional<ListOperationOptions> list_options,
       std::vector<Context>* contexts, std::string* next_page_token) = 0;
 
   // Gets a context by a type_id and a context name. If id_only is true, the

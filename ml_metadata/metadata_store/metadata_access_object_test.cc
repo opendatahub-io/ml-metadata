@@ -7947,8 +7947,9 @@ TEST_P(MetadataAccessObjectTest, FindArtifactsByTypeIds) {
   ASSERT_EQ(AddCommitPointIfNeeded(), absl::OkStatus());
 
   std::vector<Artifact> got_artifacts;
+  std::vector<std::string> groups = {""};
   EXPECT_EQ(metadata_access_object_->FindArtifactsByTypeId(
-                type_id, absl::nullopt, &got_artifacts, nullptr),
+                type_id, absl::MakeSpan(groups), absl::nullopt, &got_artifacts, nullptr),
             absl::OkStatus());
   EXPECT_EQ(got_artifacts.size(), 2);
   // Should perform unordered elements check if list option is not specified and
@@ -8017,9 +8018,10 @@ TEST_P(MetadataAccessObjectTest, FindArtifactsByTypeIdsFilterPropertyQuery) {
       )pb");
 
   std::vector<Artifact> got_artifacts;
+  std::vector<std::string> groups = {""};
   std::string next_page_token;
   ASSERT_EQ(metadata_access_object_->FindArtifactsByTypeId(
-                type1_id, absl::make_optional(list_options), &got_artifacts,
+                type1_id, absl::MakeSpan(groups), absl::make_optional(list_options), &got_artifacts,
                 &next_page_token),
             absl::OkStatus());
   ASSERT_THAT(got_artifacts, SizeIs(2));
@@ -8039,7 +8041,7 @@ TEST_P(MetadataAccessObjectTest, FindArtifactsByTypeIdsFilterPropertyQuery) {
 
   got_artifacts.clear();
   ASSERT_EQ(metadata_access_object_->FindArtifactsByTypeId(
-                type2_id, absl::make_optional(list_options), &got_artifacts,
+                type2_id, absl::MakeSpan(groups), absl::make_optional(list_options), &got_artifacts,
                 &next_page_token),
             absl::OkStatus());
   ASSERT_THAT(got_artifacts, SizeIs(1));
@@ -10484,10 +10486,11 @@ TEST_P(MetadataAccessObjectTest, ListArtifactsByType) {
     options.set_max_result_size(1);
 
     std::vector<Artifact> entities;
+    std::vector<std::string> groups = {""};
     std::string next_page_token;
     ASSERT_EQ(
         metadata_access_object_->FindArtifactsByTypeId(
-            type_id, absl::make_optional(options), &entities, &next_page_token),
+            type_id, absl::MakeSpan(groups), absl::make_optional(options), &entities, &next_page_token),
         absl::OkStatus());
     EXPECT_THAT(next_page_token, Not(IsEmpty()));
     EXPECT_THAT(entities, ElementsAre(EqualsProto(
@@ -10499,7 +10502,7 @@ TEST_P(MetadataAccessObjectTest, ListArtifactsByType) {
     options.set_next_page_token(next_page_token);
     ASSERT_EQ(
         metadata_access_object_->FindArtifactsByTypeId(
-            type_id, absl::make_optional(options), &entities, &next_page_token),
+            type_id, absl::MakeSpan(groups), absl::make_optional(options), &entities, &next_page_token),
         absl::OkStatus());
     EXPECT_THAT(next_page_token, IsEmpty());
     EXPECT_THAT(entities,

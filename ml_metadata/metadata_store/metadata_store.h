@@ -386,6 +386,7 @@ class MetadataStore : public MetadataStoreServiceInterface {
   // OK and empty response.
   // Returns detailed INTERNAL error, if query execution fails.
   absl::Status GetExecutionsByType(
+      const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
       const GetExecutionsByTypeRequest& request,
       GetExecutionsByTypeResponse* response) override;
 
@@ -421,8 +422,10 @@ class MetadataStore : public MetadataStoreServiceInterface {
   // Gets all the contexts of a given type. If no contexts found, it returns
   // OK and empty response.
   // Returns detailed INTERNAL error, if query execution fails.
-  absl::Status GetContextsByType(const GetContextsByTypeRequest& request,
-                                 GetContextsByTypeResponse* response) override;
+  absl::Status GetContextsByType(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
+    const GetContextsByTypeRequest& request,
+    GetContextsByTypeResponse* response) override;
 
   // Gets the context of a given type and name. If no context found, it returns
   // OK and empty response. If multiple contexts are found with the same type
@@ -534,6 +537,8 @@ class MetadataStore : public MetadataStoreServiceInterface {
   MetadataStore(std::unique_ptr<MetadataSource> metadata_source,
                 std::unique_ptr<MetadataAccessObject> metadata_access_object,
                 std::unique_ptr<TransactionExecutor> transaction_executor);
+
+  std::vector<std::string> ExtractGroupsFromMetadataContext(const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext);
 
   std::unique_ptr<MetadataSource> metadata_source_;
   std::unique_ptr<MetadataAccessObject> metadata_access_object_;

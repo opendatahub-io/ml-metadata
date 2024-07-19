@@ -320,7 +320,7 @@ class QueryExecutor {
   // Gets artifacts from the Artifact table by their type_id.
   // Returns a list of artifact IDs.
   virtual absl::Status SelectArtifactsByTypeID(int64_t artifact_type_id,
-                                               absl::string_view group,
+                                               absl::Span<std::string> groups,
                                                RecordSet* record_set) = 0;
 
   // Gets an artifact from the database by its uri.
@@ -395,6 +395,7 @@ class QueryExecutor {
 
   // Gets an execution from the database by its type_id.
   virtual absl::Status SelectExecutionsByTypeID(int64_t execution_type_id,
+                                                absl::Span<std::string> groups,
                                                 RecordSet* record_set) = 0;
 
   // Updates an execution in the database.
@@ -458,6 +459,7 @@ class QueryExecutor {
 
   // Returns ids of contexts matching the given context_type_id.
   virtual absl::Status SelectContextsByTypeID(int64_t context_type_id,
+                                              absl::Span<std::string> groups,
                                               RecordSet* record_set) = 0;
 
   // Returns ids of contexts matching the given context_type_id and name.

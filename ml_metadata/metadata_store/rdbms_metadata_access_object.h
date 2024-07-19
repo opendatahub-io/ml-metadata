@@ -305,7 +305,7 @@ class RDBMSMetadataAccessObject : public MetadataAccessObject {
 
   absl::Status FindArtifactsByTypeId(
       int64_t artifact_type_id,
-      absl::string_view group,
+      absl::Span<std::string> groups,
       std::optional<ListOperationOptions> list_options,
       std::vector<Artifact>* artifacts, std::string* next_page_token) final;
 
@@ -356,6 +356,7 @@ class RDBMSMetadataAccessObject : public MetadataAccessObject {
 
   absl::Status FindExecutionsByTypeId(
       int64_t execution_type_id,
+      absl::Span<std::string> groups,
       std::optional<ListOperationOptions> list_options,
       std::vector<Execution>* executions, std::string* next_page_token) final;
 
@@ -395,7 +396,8 @@ class RDBMSMetadataAccessObject : public MetadataAccessObject {
   absl::Status FindContexts(std::vector<Context>* contexts) final;
 
   absl::Status FindContextsByTypeId(
-      int64_t type_id, std::optional<ListOperationOptions> list_options,
+      int64_t type_id, absl::Span<std::string> groups,
+      std::optional<ListOperationOptions> list_options,
       std::vector<Context>* contexts, std::string* next_page_token) final;
 
   absl::Status FindContextByTypeIdAndContextName(int64_t type_id,

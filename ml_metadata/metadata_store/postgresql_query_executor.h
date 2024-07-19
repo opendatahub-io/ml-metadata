@@ -202,10 +202,11 @@ class PostgreSQLQueryExecutor : public QueryExecutor {
   }
 
   absl::Status SelectArtifactsByTypeID(int64_t artifact_type_id,
-                                       absl::string_view group,
+                                       absl::Span<std::string> groups,
                                        RecordSet* record_set) final {
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
     return ExecuteQuery(query_config_.select_artifacts_by_type_id(),
-                        {Bind(artifact_type_id), Bind(group)}, record_set);
+                        {Bind(artifact_type_id), Bind(absl::MakeSpan(groups_view))}, record_set);
   }
 
   absl::Status SelectArtifactsByURI(absl::string_view uri,
@@ -301,9 +302,11 @@ class PostgreSQLQueryExecutor : public QueryExecutor {
   }
 
   absl::Status SelectExecutionsByTypeID(int64_t execution_type_id,
+                                        absl::Span<std::string> groups,
                                         RecordSet* record_set) final {
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
     return ExecuteQuery(query_config_.select_executions_by_type_id(),
-                        {Bind(execution_type_id)}, record_set);
+                        {Bind(execution_type_id), Bind(absl::MakeSpan(groups_view))}, record_set);
   }
 
   absl::Status UpdateExecutionDirect(
@@ -383,9 +386,11 @@ class PostgreSQLQueryExecutor : public QueryExecutor {
   }
 
   absl::Status SelectContextsByTypeID(int64_t context_type_id,
+                                      absl::Span<std::string> groups,
                                       RecordSet* record_set) final {
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
     return ExecuteQuery(query_config_.select_contexts_by_type_id(),
-                        {Bind(context_type_id)}, record_set);
+                        {Bind(context_type_id), Bind(absl::MakeSpan(groups_view))}, record_set);
   }
 
   absl::Status SelectContextByTypeIDAndContextName(

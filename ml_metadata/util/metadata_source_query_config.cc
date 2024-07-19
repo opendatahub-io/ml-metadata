@@ -240,7 +240,7 @@ R"pb(
     parameter_num: 2
   }
   select_artifacts_by_type_id {
-    query: " SELECT `id` from `Artifact` WHERE `type_id` = $0 and `registry_group` = $1; "
+    query: " SELECT `id` from `Artifact` WHERE `type_id` = $0 and `registry_group` IN ($1); "
     parameter_num: 2
   }
   select_artifacts_by_uri {
@@ -361,8 +361,8 @@ R"pb(
     parameter_num: 2
   }
   select_executions_by_type_id {
-    query: " SELECT `id` from `Execution` WHERE `type_id` = $0; "
-    parameter_num: 1
+    query: " SELECT `id` from `Execution` WHERE `type_id` = $0 and `registry_group` IN ($1); "
+    parameter_num: 2
   }
   select_executions_by_external_ids {
     query: " SELECT `id` from `Execution` WHERE `external_id` IN ($0);"
@@ -472,8 +472,8 @@ R"pb(
     parameter_num: 1
   }
   select_contexts_by_type_id {
-    query: " SELECT `id` from `Context` WHERE `type_id` = $0; "
-    parameter_num: 1
+    query: " SELECT `id` from `Context` WHERE `type_id` = $0 and `registry_group` IN ($1); "
+    parameter_num: 2
   }
   select_context_by_type_id_and_name {
     query: " SELECT `id` from `Context` WHERE `type_id` = $0 and `name` = $1; "
@@ -4996,7 +4996,7 @@ R"pb(
     parameter_num: 2
   }
   select_artifacts_by_type_id {
-    query: " SELECT id FROM Artifact WHERE type_id = $0 and registry_group = $1; "
+    query: " SELECT id FROM Artifact WHERE type_id = $0 and registry_group IN ($1); "
     parameter_num: 2
   }
   select_artifacts_by_uri {
@@ -5129,8 +5129,8 @@ R"pb(
     parameter_num: 2
   }
   select_executions_by_type_id {
-    query: " SELECT id FROM Execution WHERE type_id = $0; "
-    parameter_num: 1
+    query: " SELECT id FROM Execution WHERE type_id = $0 and registry_group IN ($1); "
+    parameter_num: 2
   }
   select_executions_by_external_ids {
     query: " SELECT id FROM Execution WHERE external_id IN ($0);"
@@ -5252,8 +5252,8 @@ R"pb(
     parameter_num: 1
   }
   select_contexts_by_type_id {
-    query: " SELECT id FROM Context WHERE type_id = $0; "
-    parameter_num: 1
+    query: " SELECT id FROM Context WHERE type_id = $0 and registry_group IN ($1); "
+    parameter_num: 2
   }
   select_context_by_type_id_and_name {
     query: " SELECT id FROM Context WHERE type_id = $0 and name = $1; "

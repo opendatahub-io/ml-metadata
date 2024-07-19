@@ -2632,11 +2632,11 @@ absl::Status RDBMSMetadataAccessObject::FindArtifactByTypeIdAndArtifactName(
 }
 
 absl::Status RDBMSMetadataAccessObject::FindArtifactsByTypeId(
-    const int64_t type_id, absl::string_view group, std::optional<ListOperationOptions> list_options,
+    const int64_t type_id, absl::Span<std::string> groups, std::optional<ListOperationOptions> list_options,
     std::vector<Artifact>* artifacts, std::string* next_page_token) {
   RecordSet record_set;
   MLMD_RETURN_IF_ERROR(
-      executor_->SelectArtifactsByTypeID(type_id, group, &record_set));
+      executor_->SelectArtifactsByTypeID(type_id, groups, &record_set));
   const std::vector<int64_t> ids = ConvertToIds(record_set);
   if (ids.empty()) {
     return absl::NotFoundError(
@@ -2684,11 +2684,11 @@ absl::Status RDBMSMetadataAccessObject::FindExecutionByTypeIdAndExecutionName(
 }
 
 absl::Status RDBMSMetadataAccessObject::FindExecutionsByTypeId(
-    const int64_t type_id, std::optional<ListOperationOptions> list_options,
+    const int64_t type_id, absl::Span<std::string> groups, std::optional<ListOperationOptions> list_options,
     std::vector<Execution>* executions, std::string* next_page_token) {
   RecordSet record_set;
   MLMD_RETURN_IF_ERROR(
-      executor_->SelectExecutionsByTypeID(type_id, &record_set));
+      executor_->SelectExecutionsByTypeID(type_id, groups, &record_set));
   const std::vector<int64_t> ids = ConvertToIds(record_set);
   if (ids.empty()) {
     return absl::NotFoundError(
@@ -2714,10 +2714,10 @@ absl::Status RDBMSMetadataAccessObject::FindContexts(
 }
 
 absl::Status RDBMSMetadataAccessObject::FindContextsByTypeId(
-    const int64_t type_id, std::optional<ListOperationOptions> list_options,
+    const int64_t type_id, absl::Span<std::string> groups, std::optional<ListOperationOptions> list_options,
     std::vector<Context>* contexts, std::string* next_page_token) {
   RecordSet record_set;
-  MLMD_RETURN_IF_ERROR(executor_->SelectContextsByTypeID(type_id, &record_set));
+  MLMD_RETURN_IF_ERROR(executor_->SelectContextsByTypeID(type_id, groups, &record_set));
   const std::vector<int64_t> ids = ConvertToIds(record_set);
   if (ids.empty()) {
     return absl::NotFoundError(

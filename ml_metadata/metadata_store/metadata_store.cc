@@ -1758,6 +1758,26 @@ absl::Status MetadataStore::GetArtifactsByURI(
       request.transaction_options());
 }
 
+std::vector<std::string> MetadataStore::ExtractGroupsFromMetadataContext(const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext) {
+  std::vector<std::string> groups = {""};
+  if(MetadataContext) {
+    std::string raw_groups = "";
+    std::multimap<grpc::string_ref, grpc::string_ref>::const_iterator itr;
+    for (itr = MetadataContext->begin(); itr != MetadataContext->end(); ++itr) {
+        if(itr->first == "groups") {
+          raw_groups = std::string(itr->second.begin(), itr->second.end());
+        }
+    }
+    std::stringstream ss(raw_groups);
+    while(ss.good()){
+      std::string group;
+      std::getline(ss, group, ',');
+      groups.push_back(group);
+    }
+  }
+  return groups;
+}
+
 absl::Status MetadataStore::GetArtifactsByType(
     const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
     const GetArtifactsByTypeRequest& request,
@@ -1775,13 +1795,12 @@ absl::Status MetadataStore::GetArtifactsByType(
         } else if (!status.ok()) {
           return status;
         }
-        std::string group = "";
-        std::multimap<grpc::string_ref, grpc::string_ref>::const_iterator itr;
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         std::vector<Artifact> artifacts;
         std::string next_page_token;
         status = metadata_access_object_->FindArtifactsByTypeId(
             artifact_type_id,
-            group,
+            absl::MakeSpan(groups),
             (request.has_options() ? absl::make_optional(request.options())
                                    : absl::nullopt),
             &artifacts, &next_page_token);
@@ -1857,10 +1876,11 @@ absl::Status MetadataStore::GetArtifactsByExternalIds(
 }
 
 absl::Status MetadataStore::GetExecutionsByType(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
     const GetExecutionsByTypeRequest& request,
     GetExecutionsByTypeResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
         int64_t execution_type_id;
         absl::Status status =
@@ -1872,10 +1892,12 @@ absl::Status MetadataStore::GetExecutionsByType(
         } else if (!status.ok()) {
           return status;
         }
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         std::vector<Execution> executions;
         std::string next_page_token;
         status = metadata_access_object_->FindExecutionsByTypeId(
             execution_type_id,
+            absl::MakeSpan(groups),
             (request.has_options() ? absl::make_optional(request.options())
                                    : absl::nullopt),
             &executions, &next_page_token);
@@ -1951,10 +1973,11 @@ absl::Status MetadataStore::GetExecutionsByExternalIds(
 }
 
 absl::Status MetadataStore::GetContextsByType(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
     const GetContextsByTypeRequest& request,
     GetContextsByTypeResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
         int64_t context_type_id;
         {
@@ -1968,12 +1991,14 @@ absl::Status MetadataStore::GetContextsByType(
             return status;
           }
         }
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         std::vector<Context> contexts;
         std::string next_page_token;
         {
           absl::Status status;
           status = metadata_access_object_->FindContextsByTypeId(
               context_type_id,
+              absl::MakeSpan(groups),
               (request.has_options() ? absl::make_optional(request.options())
                                      : absl::nullopt),
               &contexts, &next_page_token);
