@@ -307,11 +307,14 @@ class MetadataAccessObject {
   virtual absl::Status CreateArtifact(const Artifact& artifact,
                                       int64_t* artifact_id) = 0;
 
+  virtual absl::Status FindArtifactsById(absl::Span<const int64_t> artifact_ids,
+                                 std::vector<Artifact>* artifacts) = 0;
+
   // Gets Artifacts matching the given 'artifact_ids'.
   // Returns NOT_FOUND error, if any of the given artifact_ids are not found.
   // Returns detailed INTERNAL error, if query execution fails.
   virtual absl::Status FindArtifactsById(absl::Span<const int64_t> artifact_ids,
-                                         std::vector<Artifact>* artifact) = 0;
+                                         std::vector<Artifact>* artifact, absl::Span<std::string> groups) = 0;
 
   // Gets a set of Artifacts by the given ids and their artifact types, which
   // can be matched by type_ids.
@@ -319,7 +322,7 @@ class MetadataAccessObject {
   // Returns detailed INTERNAL error, if query execution fails.
   virtual absl::Status FindArtifactsById(
       absl::Span<const int64_t> artifact_ids, std::vector<Artifact>& artifacts,
-      std::vector<ArtifactType>& artifact_types) = 0;
+      std::vector<ArtifactType>& artifact_types, absl::Span<std::string> groups) = 0;
 
   // Gets Artifacts matching the given 'external_ids'.
   // |external_ids| is a list of non-null strings for the given external ids.
@@ -537,6 +540,10 @@ class MetadataAccessObject {
       absl::Span<const int64_t> execution_ids,
       std::vector<Execution>* executions) = 0;
 
+  virtual absl::Status FindExecutionsById(
+      absl::Span<const int64_t> execution_ids,
+      std::vector<Execution>* executions, absl::Span<std::string> groups) = 0;
+
   // Gets executions matching the given 'external_ids'.
   // |external_ids| is a list of non-null strings for the given external ids.
   // Returns whatever found when a part of |external_ids| is non-existing.
@@ -695,6 +702,9 @@ class MetadataAccessObject {
   // Gets contexts matching a collection of ids.
   // Returns NOT_FOUND if any of the given ids are not found.
   // Returns detailed INTERNAL error if query execution fails.
+  virtual absl::Status FindContextsById(absl::Span<const int64_t> context_ids,
+                                        std::vector<Context>* context, absl::Span<std::string> groups) = 0;
+
   virtual absl::Status FindContextsById(absl::Span<const int64_t> context_ids,
                                         std::vector<Context>* context) = 0;
 

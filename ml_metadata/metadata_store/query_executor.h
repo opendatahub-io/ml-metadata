@@ -304,7 +304,7 @@ class QueryExecutor {
   // - string: type_description
   // - string: type_external_id
   virtual absl::Status SelectArtifactsByID(absl::Span<const int64_t> ids,
-                                           RecordSet* record_set) = 0;
+                                           RecordSet* record_set, absl::Span<std::string> groups) = 0;
 
   // Gets artifacts from the database by their external_ids. Not found
   // external_ids are skipped.
@@ -381,7 +381,7 @@ class QueryExecutor {
   // - string: type_description
   // - string: type_external_id
   virtual absl::Status SelectExecutionsByID(
-      absl::Span<const int64_t> execution_ids, RecordSet* record_set) = 0;
+      absl::Span<const int64_t> execution_ids, RecordSet* record_set, absl::Span<std::string> groups) = 0;
 
   // Gets executions based on the given external_ids. Not found
   // external_ids are skipped.
@@ -450,7 +450,7 @@ class QueryExecutor {
   // - string: type_description
   // - string: type_external_id
   virtual absl::Status SelectContextsByID(absl::Span<const int64_t> context_ids,
-                                          RecordSet* record_set) = 0;
+                                          RecordSet* record_set, absl::Span<std::string> groups) = 0;
 
   // Gets contexts from the database by their external_ids. Not found
   // external_ids are skipped.

@@ -330,7 +330,8 @@ class MetadataStore : public MetadataStoreServiceInterface {
   // If no artifact with an ID exists, the artifact is skipped.
   // Sets the error field if any other internal errors are returned.
   // Returns detailed INTERNAL error, if query execution fails.
-  absl::Status GetArtifactsByID(const GetArtifactsByIDRequest& request,
+  absl::Status GetArtifactsByID(const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
+                                const GetArtifactsByIDRequest& request,
                                 GetArtifactsByIDResponse* response) override;
 
   // Gets Artifacts using list options.
@@ -373,7 +374,8 @@ class MetadataStore : public MetadataStoreServiceInterface {
   // If no execution with an ID exists, the execution is skipped.
   // Sets the error field if any other internal errors are returned.
   // Returns detailed INTERNAL error, if query execution fails.
-  absl::Status GetExecutionsByID(const GetExecutionsByIDRequest& request,
+  absl::Status GetExecutionsByID(const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
+                                 const GetExecutionsByIDRequest& request,
                                  GetExecutionsByIDResponse* response) override;
 
   // Gets Executions using list options.
@@ -410,7 +412,8 @@ class MetadataStore : public MetadataStoreServiceInterface {
   // If no context with an ID exists, the context is skipped.
   // Sets the error field if any other internal errors are returned.
   // Returns detailed INTERNAL error, if query execution fails.
-  absl::Status GetContextsByID(const GetContextsByIDRequest& request,
+  absl::Status GetContextsByID(const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
+                               const GetContextsByIDRequest& request,
                                GetContextsByIDResponse* response) override;
 
   // Retrieve Contexts using list options.

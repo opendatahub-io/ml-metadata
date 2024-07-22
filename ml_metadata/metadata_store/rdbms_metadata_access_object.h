@@ -281,9 +281,12 @@ class RDBMSMetadataAccessObject : public MetadataAccessObject {
   absl::Status FindArtifactsById(absl::Span<const int64_t> artifact_ids,
                                  std::vector<Artifact>* artifacts) final;
 
+  absl::Status FindArtifactsById(absl::Span<const int64_t> artifact_ids,
+                                 std::vector<Artifact>* artifacts, absl::Span<std::string> groups) final;
+
   absl::Status FindArtifactsById(
       absl::Span<const int64_t> artifact_ids, std::vector<Artifact>& artifacts,
-      std::vector<ArtifactType>& artifact_types) final;
+      std::vector<ArtifactType>& artifact_types, absl::Span<std::string> groups) final;
 
   absl::Status FindArtifactsByExternalIds(
       absl::Span<absl::string_view> external_ids,
@@ -345,6 +348,9 @@ class RDBMSMetadataAccessObject : public MetadataAccessObject {
   absl::Status FindExecutionsById(absl::Span<const int64_t> execution_ids,
                                   std::vector<Execution>* executions) final;
 
+  absl::Status FindExecutionsById(absl::Span<const int64_t> execution_ids,
+                                  std::vector<Execution>* executions, absl::Span<std::string> groups) final;
+
   absl::Status FindExecutionsByExternalIds(
       absl::Span<absl::string_view> external_ids,
       std::vector<Execution>* executions) final;
@@ -385,6 +391,9 @@ class RDBMSMetadataAccessObject : public MetadataAccessObject {
                              int64_t* context_id) final;
 
   absl::Status CreateContext(const Context& context, int64_t* context_id) final;
+
+  absl::Status FindContextsById(absl::Span<const int64_t> context_ids,
+                                std::vector<Context>* contexts, absl::Span<std::string> groups) final;
 
   absl::Status FindContextsById(absl::Span<const int64_t> context_ids,
                                 std::vector<Context>* contexts) final;
@@ -633,7 +642,7 @@ class RDBMSMetadataAccessObject : public MetadataAccessObject {
   // QueryExecutor::Select{Node}PropertyBy{Node}ID().
   template <typename T>
   absl::Status RetrieveNodesById(
-      absl::Span<const int64_t> id, RecordSet* header, RecordSet* properties);
+      absl::Span<const int64_t> id, RecordSet* header, RecordSet* properties, absl::Span<std::string> groups);
 
   // Update a Node's assets based on the field mask.
   // If `mask` is empty, update `stored_node` as a whole.
@@ -821,7 +830,7 @@ class RDBMSMetadataAccessObject : public MetadataAccessObject {
   // Returns NOT_FOUND error, if the given id cannot be found.
   // Returns detailed INTERNAL error, if query execution fails.
   template <typename Node>
-  absl::Status FindNodeImpl(int64_t node_id, Node* node);
+  absl::Status FindNodeImpl(int64_t node_id, Node* node, absl::Span<std::string> groups);
 
   // Gets a set of `Node` which is one of {`Artifact`, `Execution`,
   // `Context`} by the given 'ids'.
@@ -833,7 +842,7 @@ class RDBMSMetadataAccessObject : public MetadataAccessObject {
   // otherwise INTERNAL error.
   template <typename Node>
   absl::Status FindNodesImpl(absl::Span<const int64_t> node_ids,
-                             bool skipped_ids_ok, std::vector<Node>& nodes);
+                             bool skipped_ids_ok, std::vector<Node>& nodes, absl::Span<std::string> groups);
 
   // Gets a set of `Node` which is one of {`Artifact`, `Execution`,
   // `Context`} by the given 'node_ids' and their node types, which
@@ -844,7 +853,8 @@ class RDBMSMetadataAccessObject : public MetadataAccessObject {
   template <typename Node, typename NodeType>
   absl::Status FindNodesWithTypesImpl(absl::Span<const int64_t> node_ids,
                                       std::vector<Node>& nodes,
-                                      std::vector<NodeType>& node_types);
+                                      std::vector<NodeType>& node_types,
+                                      absl::Span<std::string> groups);
 
   // Updates with masking for a `Node` being one of {`Artifact`, `Execution`,
   // `Context`}.

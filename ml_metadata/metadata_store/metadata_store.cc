@@ -1061,20 +1061,22 @@ absl::Status MetadataStore::GetContextTypesByExternalIds(
 }
 
 absl::Status MetadataStore::GetArtifactsByID(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
     const GetArtifactsByIDRequest& request,
     GetArtifactsByIDResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
         std::vector<Artifact> artifacts;
         std::vector<ArtifactType> artifact_types;
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         const std::vector<int64_t> ids(request.artifact_ids().begin(),
                                        request.artifact_ids().end());
         const absl::Status status =
             request.populate_artifact_types()
                 ? metadata_access_object_->FindArtifactsById(ids, artifacts,
-                                                             artifact_types)
-                : metadata_access_object_->FindArtifactsById(ids, &artifacts);
+                                                             artifact_types, absl::MakeSpan(groups))
+                : metadata_access_object_->FindArtifactsById(ids, &artifacts, absl::MakeSpan(groups));
         if (!status.ok() && !absl::IsNotFound(status)) {
           return status;
         }
@@ -1090,16 +1092,18 @@ absl::Status MetadataStore::GetArtifactsByID(
 }
 
 absl::Status MetadataStore::GetExecutionsByID(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
     const GetExecutionsByIDRequest& request,
     GetExecutionsByIDResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
         std::vector<Execution> executions;
         const std::vector<int64_t> ids(request.execution_ids().begin(),
                                        request.execution_ids().end());
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         const absl::Status status =
-            metadata_access_object_->FindExecutionsById(ids, &executions);
+            metadata_access_object_->FindExecutionsById(ids, &executions, absl::MakeSpan(groups));
         if (!status.ok() && !absl::IsNotFound(status)) {
           return status;
         }
@@ -1111,15 +1115,17 @@ absl::Status MetadataStore::GetExecutionsByID(
 }
 
 absl::Status MetadataStore::GetContextsByID(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
     const GetContextsByIDRequest& request, GetContextsByIDResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
         std::vector<Context> contexts;
         const std::vector<int64_t> ids(request.context_ids().begin(),
                                        request.context_ids().end());
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         const absl::Status status =
-            metadata_access_object_->FindContextsById(ids, &contexts);
+            metadata_access_object_->FindContextsById(ids, &contexts, absl::MakeSpan(groups));
         if (!status.ok() && !absl::IsNotFound(status)) {
           return status;
         }

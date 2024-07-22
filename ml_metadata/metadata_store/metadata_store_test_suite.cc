@@ -1336,7 +1336,8 @@ TEST_P(MetadataStoreTestSuite, PutTypesAndArtifactsGetArtifactsThroughType) {
         }
         GetArtifactsByTypeResponse get_nodes_response;
         ASSERT_EQ(absl::OkStatus(),
-                  metadata_store_->GetArtifactsByType(get_nodes_request,
+                  metadata_store_->GetArtifactsByType(/*MetadataContext=*/nullptr,
+                                                      get_nodes_request,
                                                       &get_nodes_response));
         EXPECT_THAT(
             get_nodes_response.artifacts(),
@@ -1412,7 +1413,8 @@ TEST_P(MetadataStoreTestSuite,
              absl::Span<Artifact> want_artifacts,
              GetArtifactsByTypeResponse& get_nodes_response) {
         ASSERT_EQ(absl::OkStatus(),
-                  metadata_store_->GetArtifactsByType(get_nodes_request,
+                  metadata_store_->GetArtifactsByType(/*MetadataContext=*/nullptr,
+                                                      get_nodes_request,
                                                       &get_nodes_response));
         ASSERT_EQ(want_artifacts.size(), get_nodes_response.artifacts_size());
         EXPECT_THAT(
@@ -3491,6 +3493,7 @@ TEST_P(MetadataStoreTestSuite,
   GetArtifactsByTypeResponse get_artifacts_by_not_exist_type_response;
   get_artifacts_by_not_exist_type_request.set_type_name("artifact_type");
   ASSERT_EQ(absl::OkStatus(), metadata_store_->GetArtifactsByType(
+                                  /*MetadataContext=*/nullptr,
                                   get_artifacts_by_not_exist_type_request,
                                   &get_artifacts_by_not_exist_type_response));
   EXPECT_THAT(get_artifacts_by_not_exist_type_response.artifacts(), SizeIs(0));
@@ -3520,6 +3523,7 @@ TEST_P(MetadataStoreTestSuite, GetArtifactAndExecutionByTypesWithEmptyType) {
   GetArtifactsByTypeResponse get_artifacts_by_empty_type_response;
   get_artifacts_by_empty_type_request.set_type_name("empty_artifact_type");
   ASSERT_EQ(absl::OkStatus(), metadata_store_->GetArtifactsByType(
+                                  /*MetadataContext=*/nullptr,
                                   get_artifacts_by_empty_type_request,
                                   &get_artifacts_by_empty_type_response));
   EXPECT_THAT(get_artifacts_by_empty_type_response.artifacts(), SizeIs(0));
@@ -3692,6 +3696,7 @@ TEST_P(MetadataStoreTestSuite, PutArtifactsGetArtifactsWithEmptyArtifact) {
   GetArtifactsByTypeResponse get_artifacts_by_type_response;
   get_artifacts_by_type_request.set_type_name("test_type2");
   ASSERT_EQ(absl::OkStatus(), metadata_store_->GetArtifactsByType(
+                                  /*MetadataContext=*/nullptr,
                                   get_artifacts_by_type_request,
                                   &get_artifacts_by_type_response));
   ASSERT_THAT(get_artifacts_by_type_response.artifacts(), SizeIs(1));
@@ -3701,6 +3706,7 @@ TEST_P(MetadataStoreTestSuite, PutArtifactsGetArtifactsWithEmptyArtifact) {
   GetArtifactsByTypeResponse get_artifacts_by_not_exist_type_response;
   get_artifacts_by_not_exist_type_request.set_type_name("not_exist_type");
   ASSERT_EQ(absl::OkStatus(), metadata_store_->GetArtifactsByType(
+                                  /*MetadataContext=*/nullptr,
                                   get_artifacts_by_not_exist_type_request,
                                   &get_artifacts_by_not_exist_type_response));
   EXPECT_THAT(get_artifacts_by_not_exist_type_response.artifacts(), SizeIs(0));

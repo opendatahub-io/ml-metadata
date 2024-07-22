@@ -468,8 +468,9 @@ class QueryConfigExecutor : public QueryExecutor {
   }
 
   absl::Status SelectArtifactsByID(absl::Span<const int64_t> artifact_ids,
-                                   RecordSet* record_set) final {
+                                   RecordSet* record_set, absl::Span<std::string> groups) final {
     // TODO(b/248836219): Cleanup the fat-client after fully migrated to V9+.
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
     if (query_schema_version().has_value() &&
         query_schema_version().value() < kSchemaVersionNine) {
       MetadataSourceQueryConfig::TemplateQuery select_artifact_by_id;
@@ -483,11 +484,11 @@ class QueryConfigExecutor : public QueryExecutor {
             entity_query::v7_and_v8::kSelectArtifactByIdForSQLite.data(),
             select_artifact_by_id));
       }
-      return ExecuteQuery(select_artifact_by_id, {Bind(artifact_ids)},
+      return ExecuteQuery(select_artifact_by_id, {Bind(artifact_ids), Bind(absl::MakeSpan(groups_view))},
                           record_set);
     }
     return ExecuteQuery(query_config_.select_artifact_by_id(),
-                        {Bind(artifact_ids)}, record_set);
+                        {Bind(artifact_ids), Bind(absl::MakeSpan(groups_view))}, record_set);
   }
 
   absl::Status SelectArtifactsByExternalIds(
@@ -632,7 +633,8 @@ class QueryConfigExecutor : public QueryExecutor {
   }
 
   absl::Status SelectExecutionsByID(absl::Span<const int64_t> execution_ids,
-                                    RecordSet* record_set) final {
+                                    RecordSet* record_set, absl::Span<std::string> groups) final {
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
     // TODO(b/248836219): Cleanup the fat-client after fully migrated to V9+.
     if (query_schema_version().has_value() &&
         query_schema_version().value() < kSchemaVersionNine) {
@@ -648,11 +650,11 @@ class QueryConfigExecutor : public QueryExecutor {
             entity_query::v7_and_v8::kSelectExecutionByIdForSQLite.data(),
             select_execution_by_id));
       }
-      return ExecuteQuery(select_execution_by_id, {Bind(execution_ids)},
+      return ExecuteQuery(select_execution_by_id, {Bind(execution_ids), Bind(absl::MakeSpan(groups_view))},
                           record_set);
     }
     return ExecuteQuery(query_config_.select_execution_by_id(),
-                        {Bind(execution_ids)}, record_set);
+                        {Bind(execution_ids), Bind(absl::MakeSpan(groups_view))}, record_set);
   }
 
   absl::Status SelectExecutionsByExternalIds(absl::Span<absl::string_view> ids,
@@ -789,8 +791,9 @@ class QueryConfigExecutor : public QueryExecutor {
   }
 
   absl::Status SelectContextsByID(absl::Span<const int64_t> context_ids,
-                                  RecordSet* record_set) final {
+                                  RecordSet* record_set, absl::Span<std::string> groups) final {
     // TODO(b/248836219): Cleanup the fat-client after fully migrated to V9+.
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
     if (query_schema_version().has_value() &&
         query_schema_version().value() < kSchemaVersionNine) {
       MetadataSourceQueryConfig::TemplateQuery select_context_by_id;
@@ -804,11 +807,11 @@ class QueryConfigExecutor : public QueryExecutor {
             entity_query::v7_and_v8::kSelectContextByIdForSQLite.data(),
             select_context_by_id));
       }
-      return ExecuteQuery(select_context_by_id, {Bind(context_ids)},
+      return ExecuteQuery(select_context_by_id, {Bind(context_ids), Bind(absl::MakeSpan(groups_view))},
                           record_set);
     }
     return ExecuteQuery(query_config_.select_context_by_id(),
-                        {Bind(context_ids)}, record_set);
+                        {Bind(context_ids), Bind(absl::MakeSpan(groups_view))}, record_set);
   }
 
   absl::Status SelectContextsByExternalIds(

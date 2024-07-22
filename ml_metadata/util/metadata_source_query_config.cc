@@ -232,8 +232,8 @@ R"pb(
            " FROM `Artifact` AS A "
            " LEFT JOIN `Type` AS T "
            "   ON (T.id = A.type_id) "
-           " WHERE A.id IN ($0); "
-    parameter_num: 1
+           " WHERE A.id IN ($0) and A.registry_group IN ($1); "
+    parameter_num: 2
   }
   select_artifact_by_type_id_and_name {
     query: " SELECT `id` from `Artifact` WHERE `type_id` = $0 and `name` = $1; "
@@ -353,8 +353,8 @@ R"pb(
           " FROM `Execution` AS E "
           " LEFT JOIN `Type` AS T "
           "   ON (T.id = E.type_id) "
-          " WHERE E.id IN ($0); "
-    parameter_num: 1
+          " WHERE E.id IN ($0) and E.registry_group IN ($1); "
+    parameter_num: 2
   }
   select_execution_by_type_id_and_name {
     query: " SELECT `id` from `Execution` WHERE `type_id` = $0 and `name` = $1;"
@@ -468,8 +468,8 @@ R"pb(
            "        C.registry_group "
            " FROM `Context` AS C "
            " LEFT JOIN `Type` AS T ON (T.id = C.type_id) "
-           " WHERE C.id IN ($0); "
-    parameter_num: 1
+           " WHERE C.id IN ($0) and C.registry_group IN ($1); "
+    parameter_num: 2
   }
   select_contexts_by_type_id {
     query: " SELECT `id` from `Context` WHERE `type_id` = $0 and `registry_group` IN ($1); "
@@ -2938,8 +2938,8 @@ R"pb(
            "        C.registry_group "
            " FROM `Context` AS C "
            " LEFT JOIN `Type` AS T ON (T.id = C.type_id) "
-           " WHERE C.id IN ($0) LOCK IN SHARE MODE; "
-    parameter_num: 1
+           " WHERE C.id IN ($0) and C.registry_group IN ($1) LOCK IN SHARE MODE; "
+    parameter_num: 2
   }
   select_execution_by_id {
     query: " SELECT E.id, E.type_id, E.last_known_state, E.name, "
@@ -2952,8 +2952,8 @@ R"pb(
            " FROM `Execution` AS E "
            " LEFT JOIN `Type` AS T "
            "   ON (T.id = E.type_id) "
-           " WHERE E.id IN ($0) LOCK IN SHARE MODE; "
-    parameter_num: 1
+           " WHERE E.id IN ($0) and E.registry_group IN ($1) LOCK IN SHARE MODE; "
+    parameter_num: 2
   }
   select_artifact_by_id {
     query: " SELECT A.id, A.type_id, A.uri, A.state, A.name, "
@@ -2966,8 +2966,8 @@ R"pb(
            " FROM `Artifact` AS A "
            " LEFT JOIN `Type` AS T "
            "   ON (T.id = A.type_id) "
-           " WHERE A.id IN ($0) LOCK IN SHARE MODE; "
-    parameter_num: 1
+           " WHERE A.id IN ($0) and A.registry_group IN ($1) LOCK IN SHARE MODE; "
+    parameter_num: 2
   }
   select_parent_type_by_type_id {
     query: " SELECT `type_id`, `parent_type_id` "
@@ -4988,8 +4988,8 @@ R"pb(
            " FROM Artifact AS A "
            " LEFT JOIN Type AS T "
            "    ON (T.id = A.type_id) "
-           " WHERE A.id IN ($0); "
-    parameter_num: 1
+           " WHERE A.id IN ($0) and A.registry_group IN ($1); "
+    parameter_num: 2
   }
   select_artifact_by_type_id_and_name {
     query: " SELECT id FROM Artifact WHERE type_id = $0 and name = $1; "
@@ -5121,8 +5121,8 @@ R"pb(
            " FROM Execution AS E "
            " LEFT JOIN Type AS T "
            "        ON (T.id = E.type_id) "
-           " WHERE E.id IN ($0);"
-    parameter_num: 1
+           " WHERE E.id IN ($0) and E.registry_group IN ($1);"
+    parameter_num: 2
   }
   select_execution_by_type_id_and_name {
     query: " SELECT id FROM Execution WHERE type_id = $0 and name = $1;"
@@ -5248,8 +5248,8 @@ R"pb(
            " C.registry_group "
            " FROM Context AS C "
            " LEFT JOIN Type AS T ON (T.id = C.type_id) "
-           " WHERE C.id IN ($0); "
-    parameter_num: 1
+           " WHERE C.id IN ($0) and C.registry_group IN ($1); "
+    parameter_num: 2
   }
   select_contexts_by_type_id {
     query: " SELECT id FROM Context WHERE type_id = $0 and registry_group IN ($1); "

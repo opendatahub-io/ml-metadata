@@ -896,6 +896,7 @@ TEST_P(QueryExecutorTest, SelectArtifacts) {
   RecordSet expected_artifact_record_set;
   int64_t artifact_id_1;
   int64_t artifact_id_2;
+  std::vector<std::string> groups = {"", "artifact_owner"};
   const absl::Time test_create_time = absl::Now();
   const std::string test_external_id_1 = "test_artifact_1";
   {
@@ -989,7 +990,7 @@ TEST_P(QueryExecutorTest, SelectArtifacts) {
   {
     RecordSet got_artifact_record_set;
     ASSERT_EQ(absl::OkStatus(), query_executor_->SelectArtifactsByTypeID(
-                                    type_id, &got_artifact_record_set));
+                                    type_id, absl::MakeSpan(groups), &got_artifact_record_set));
     std::vector<int64_t> expected_artifact_ids = {artifact_id_1, artifact_id_2};
     ValidateNodeRecordSetByNodeIDs(got_artifact_record_set,
                                    absl::MakeSpan(expected_artifact_ids));

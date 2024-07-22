@@ -181,9 +181,10 @@ class PostgreSQLQueryExecutor : public QueryExecutor {
   }
 
   absl::Status SelectArtifactsByID(absl::Span<const int64_t> artifact_ids,
-                                   RecordSet* record_set) final {
+                                   RecordSet* record_set, absl::Span<std::string> groups) final {
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
     return ExecuteQuery(query_config_.select_artifact_by_id(),
-                        {Bind(artifact_ids)}, record_set);
+                        {Bind(artifact_ids), Bind(absl::MakeSpan(groups_view))}, record_set);
   }
 
   absl::Status SelectArtifactsByExternalIds(
@@ -281,9 +282,10 @@ class PostgreSQLQueryExecutor : public QueryExecutor {
   }
 
   absl::Status SelectExecutionsByID(absl::Span<const int64_t> execution_ids,
-                                    RecordSet* record_set) final {
+                                    RecordSet* record_set, absl::Span<std::string> groups) final {
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
     return ExecuteQuery(query_config_.select_execution_by_id(),
-                        {Bind(execution_ids)}, record_set);
+                        {Bind(execution_ids), Bind(absl::MakeSpan(groups_view))}, record_set);
   }
 
   absl::Status SelectExecutionsByExternalIds(absl::Span<absl::string_view> ids,
@@ -372,9 +374,10 @@ class PostgreSQLQueryExecutor : public QueryExecutor {
   }
 
   absl::Status SelectContextsByID(absl::Span<const int64_t> context_ids,
-                                  RecordSet* record_set) final {
+                                  RecordSet* record_set, absl::Span<std::string> groups) final {
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
     return ExecuteQuery(query_config_.select_context_by_id(),
-                        {Bind(context_ids)}, record_set);
+                        {Bind(context_ids), Bind(absl::MakeSpan(groups_view))}, record_set);
   }
 
   absl::Status SelectContextsByExternalIds(
