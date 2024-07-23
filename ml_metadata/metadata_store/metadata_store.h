@@ -362,6 +362,7 @@ class MetadataStore : public MetadataStoreServiceInterface {
   // returns OK and empty response.
   // Returns detailed INTERNAL error, if query execution fails.
   absl::Status GetArtifactByTypeAndName(
+      const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
       const GetArtifactByTypeAndNameRequest& request,
       GetArtifactByTypeAndNameResponse* response) override;
 
@@ -398,6 +399,7 @@ class MetadataStore : public MetadataStoreServiceInterface {
   // returns OK and empty response.
   // Returns detailed INTERNAL error, if query execution fails.
   absl::Status GetExecutionByTypeAndName(
+      const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
       const GetExecutionByTypeAndNameRequest& request,
       GetExecutionByTypeAndNameResponse* response) override;
 
@@ -437,6 +439,7 @@ class MetadataStore : public MetadataStoreServiceInterface {
   // OK and empty response. If multiple contexts are found with the same type
   // and name, the query execution fails.
   absl::Status GetContextByTypeAndName(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
       const GetContextByTypeAndNameRequest& request,
       GetContextByTypeAndNameResponse* response) override;
 

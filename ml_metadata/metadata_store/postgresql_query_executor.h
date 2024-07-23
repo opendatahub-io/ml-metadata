@@ -196,10 +196,11 @@ class PostgreSQLQueryExecutor : public QueryExecutor {
   }
 
   absl::Status SelectArtifactByTypeIDAndArtifactName(
-      int64_t artifact_type_id, absl::string_view name,
+      int64_t artifact_type_id, absl::string_view name, absl::Span<std::string> groups,
       RecordSet* record_set) final {
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
     return ExecuteQuery(query_config_.select_artifact_by_type_id_and_name(),
-                        {Bind(artifact_type_id), Bind(name)}, record_set);
+                        {Bind(artifact_type_id), Bind(name), Bind(absl::MakeSpan(groups_view))}, record_set);
   }
 
   absl::Status SelectArtifactsByTypeID(int64_t artifact_type_id,
@@ -297,10 +298,11 @@ class PostgreSQLQueryExecutor : public QueryExecutor {
   }
 
   absl::Status SelectExecutionByTypeIDAndExecutionName(
-      int64_t execution_type_id, absl::string_view name,
+      int64_t execution_type_id, absl::string_view name, absl::Span<std::string> groups,
       RecordSet* record_set) final {
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
     return ExecuteQuery(query_config_.select_execution_by_type_id_and_name(),
-                        {Bind(execution_type_id), Bind(name)}, record_set);
+                        {Bind(execution_type_id), Bind(name), Bind(absl::MakeSpan(groups_view))}, record_set);
   }
 
   absl::Status SelectExecutionsByTypeID(int64_t execution_type_id,
@@ -397,10 +399,11 @@ class PostgreSQLQueryExecutor : public QueryExecutor {
   }
 
   absl::Status SelectContextByTypeIDAndContextName(
-      int64_t context_type_id, absl::string_view name,
+      int64_t context_type_id, absl::string_view name, absl::Span<std::string> groups,
       RecordSet* record_set) final {
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
     return ExecuteQuery(query_config_.select_context_by_type_id_and_name(),
-                        {Bind(context_type_id), Bind(name)}, record_set);
+                        {Bind(context_type_id), Bind(name), Bind(absl::MakeSpan(groups_view))}, record_set);
   }
 
   absl::Status UpdateContextDirect(int64_t existing_context_id, int64_t type_id,

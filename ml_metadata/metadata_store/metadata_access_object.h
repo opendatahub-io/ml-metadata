@@ -399,7 +399,7 @@ class MetadataAccessObject {
   // Returns NOT_FOUND error, if no artifact can be found.
   // Returns detailed INTERNAL error, if query execution fails.
   virtual absl::Status FindArtifactByTypeIdAndArtifactName(
-      int64_t artifact_type_id, absl::string_view name, Artifact* artifact) = 0;
+      int64_t artifact_type_id, absl::string_view name, Artifact* artifact, absl::Span<std::string> groups) = 0;
 
   // Gets artifacts by a given type_id.
   // Returns NOT_FOUND error, if the given artifact_type_id cannot be found.
@@ -565,7 +565,7 @@ class MetadataAccessObject {
   // Returns NOT_FOUND error, if no execution can be found.
   // Returns detailed INTERNAL error, if query execution fails.
   virtual absl::Status FindExecutionByTypeIdAndExecutionName(
-      int64_t execution_type_id, absl::string_view name,
+      int64_t execution_type_id, absl::string_view name, absl::Span<std::string> groups,
       Execution* execution) = 0;
 
   // Gets executions by a given type_id.
@@ -739,6 +739,7 @@ class MetadataAccessObject {
   virtual absl::Status FindContextByTypeIdAndContextName(int64_t type_id,
                                                          absl::string_view name,
                                                          bool id_only,
+                                                         absl::Span<std::string> groups,
                                                          Context* context) = 0;
 
   // Updates a context.

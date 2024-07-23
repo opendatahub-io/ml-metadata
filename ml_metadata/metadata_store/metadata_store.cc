@@ -424,9 +424,10 @@ absl::Status UpsertContextWithOptions(
   // Try to reuse existing context if the options is set.
   if (reuse_context_if_already_exist && !context.has_id()) {
     Context id_only_context;
+    std::vector<std::string> groups = {""};
     const absl::Status status =
         metadata_access_object->FindContextByTypeIdAndContextName(
-            context.type_id(), context.name(), /*id_only=*/true,
+            context.type_id(), context.name(), /*id_only=*/true, absl::MakeSpan(groups),
             &id_only_context);
     if (!absl::IsNotFound(status)) {
       MLMD_RETURN_IF_ERROR(status);
@@ -1833,10 +1834,11 @@ absl::Status MetadataStore::GetArtifactsByType(
 }
 
 absl::Status MetadataStore::GetArtifactByTypeAndName(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
     const GetArtifactByTypeAndNameRequest& request,
     GetArtifactByTypeAndNameResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
         int64_t artifact_type_id;
         absl::Status status =
@@ -1848,9 +1850,10 @@ absl::Status MetadataStore::GetArtifactByTypeAndName(
         } else if (!status.ok()) {
           return status;
         }
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         Artifact artifact;
         status = metadata_access_object_->FindArtifactByTypeIdAndArtifactName(
-            artifact_type_id, request.artifact_name(), &artifact);
+            artifact_type_id, request.artifact_name(), &artifact, absl::MakeSpan(groups));
         if (absl::IsNotFound(status)) {
           return absl::OkStatus();
         } else if (!status.ok()) {
@@ -1930,10 +1933,11 @@ absl::Status MetadataStore::GetExecutionsByType(
 }
 
 absl::Status MetadataStore::GetExecutionByTypeAndName(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
     const GetExecutionByTypeAndNameRequest& request,
     GetExecutionByTypeAndNameResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
         int64_t execution_type_id;
         absl::Status status =
@@ -1945,9 +1949,10 @@ absl::Status MetadataStore::GetExecutionByTypeAndName(
         } else if (!status.ok()) {
           return status;
         }
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         Execution execution;
         status = metadata_access_object_->FindExecutionByTypeIdAndExecutionName(
-            execution_type_id, request.execution_name(), &execution);
+            execution_type_id, request.execution_name(), absl::MakeSpan(groups), &execution);
         if (absl::IsNotFound(status)) {
           return absl::OkStatus();
         } else if (!status.ok()) {
@@ -2032,10 +2037,11 @@ absl::Status MetadataStore::GetContextsByType(
 }
 
 absl::Status MetadataStore::GetContextByTypeAndName(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
     const GetContextByTypeAndNameRequest& request,
     GetContextByTypeAndNameResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
         int64_t context_type_id;
         absl::Status status =
@@ -2047,9 +2053,10 @@ absl::Status MetadataStore::GetContextByTypeAndName(
         } else if (!status.ok()) {
           return status;
         }
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         Context context;
         status = metadata_access_object_->FindContextByTypeIdAndContextName(
-            context_type_id, request.context_name(), /*id_only=*/false,
+            context_type_id, request.context_name(), /*id_only=*/false, absl::MakeSpan(groups),
             &context);
         if (absl::IsNotFound(status)) {
           return absl::OkStatus();

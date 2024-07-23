@@ -522,8 +522,10 @@ MetadataStoreServiceImpl::MetadataStoreServiceImpl(
                  << connection_status.error_message();
     return connection_status;
   }
+  const std::multimap<grpc::string_ref, grpc::string_ref> MetadataContext =
+        context->client_metadata();
   const ::grpc::Status transaction_status = ToGRPCStatus(
-      metadata_store->GetArtifactByTypeAndName(*request, response));
+      metadata_store->GetArtifactByTypeAndName(&MetadataContext, *request, response));
   if (!transaction_status.ok()) {
     LOG(WARNING) << "GetArtifactByTypeAndName failed: "
                  << transaction_status.error_message();
@@ -733,8 +735,10 @@ MetadataStoreServiceImpl::MetadataStoreServiceImpl(
                  << connection_status.error_message();
     return connection_status;
   }
+  const std::multimap<grpc::string_ref, grpc::string_ref> MetadataContext =
+        context->client_metadata();
   const ::grpc::Status transaction_status = ToGRPCStatus(
-      metadata_store->GetExecutionByTypeAndName(*request, response));
+      metadata_store->GetExecutionByTypeAndName(&MetadataContext, *request, response));
   if (!transaction_status.ok()) {
     LOG(WARNING) << "GetExecutionByTypeAndName failed: "
                  << transaction_status.error_message();
@@ -840,8 +844,10 @@ MetadataStoreServiceImpl::MetadataStoreServiceImpl(
                  << connection_status.error_message();
     return connection_status;
   }
+  const std::multimap<grpc::string_ref, grpc::string_ref> MetadataContext =
+        context->client_metadata();
   const ::grpc::Status transaction_status =
-      ToGRPCStatus(metadata_store->GetContextByTypeAndName(*request, response));
+      ToGRPCStatus(metadata_store->GetContextByTypeAndName(&MetadataContext, *request, response));
   if (!transaction_status.ok()) {
     LOG(WARNING) << "GetContextByTypeAndName failed: "
                  << transaction_status.error_message();

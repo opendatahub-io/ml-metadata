@@ -2656,16 +2656,15 @@ absl::Status RDBMSMetadataAccessObject::ListContexts(
 }
 
 absl::Status RDBMSMetadataAccessObject::FindArtifactByTypeIdAndArtifactName(
-    const int64_t type_id, absl::string_view name, Artifact* artifact) {
+    const int64_t type_id, absl::string_view name, Artifact* artifact, absl::Span<std::string> groups) {
   RecordSet record_set;
   MLMD_RETURN_IF_ERROR(executor_->SelectArtifactByTypeIDAndArtifactName(
-      type_id, name, &record_set));
+      type_id, name, groups, &record_set));
   const std::vector<int64_t> ids = ConvertToIds(record_set);
   if (ids.empty()) {
     return absl::NotFoundError(absl::StrCat(
         "No artifacts found for type_id:", type_id, ", name:", name));
   }
-  std::vector<std::string> groups = {""};
   std::vector<Artifact> artifacts;
   MLMD_RETURN_IF_ERROR(FindNodesImpl(ids, /*skipped_ids_ok=*/false, artifacts, absl::MakeSpan(groups)));
   // By design, a <type_id, name> pair uniquely identifies an artifact.
@@ -2708,19 +2707,18 @@ absl::Status RDBMSMetadataAccessObject::FindExecutions(
 }
 
 absl::Status RDBMSMetadataAccessObject::FindExecutionByTypeIdAndExecutionName(
-    const int64_t type_id, absl::string_view name, Execution* execution) {
+    const int64_t type_id, absl::string_view name, absl::Span<std::string> groups, Execution* execution) {
   RecordSet record_set;
   MLMD_RETURN_IF_ERROR(executor_->SelectExecutionByTypeIDAndExecutionName(
-      type_id, name, &record_set));
+      type_id, name, groups, &record_set));
   const std::vector<int64_t> ids = ConvertToIds(record_set);
   if (ids.empty()) {
     return absl::NotFoundError(absl::StrCat(
         "No executions found for type_id:", type_id, ", name:", name));
   }
   std::vector<Execution> executions;
-  std::vector<std::string> groups = {""};
   MLMD_RETURN_IF_ERROR(
-      FindNodesImpl(ids, /*skipped_ids_ok=*/false, executions, absl::MakeSpan(groups)));
+      FindNodesImpl(ids, /*skipped_ids_ok=*/false, executions, groups));
   // By design, a <type_id, name> pair uniquely identifies an execution.
   // Fails if multiple executions are found.
   CHECK_EQ(executions.size(), 1)
@@ -2792,10 +2790,10 @@ absl::Status RDBMSMetadataAccessObject::FindArtifactsByURI(
 }
 
 absl::Status RDBMSMetadataAccessObject::FindContextByTypeIdAndContextName(
-    int64_t type_id, absl::string_view name, bool id_only, Context* context) {
+    int64_t type_id, absl::string_view name, bool id_only, absl::Span<std::string> groups, Context* context) {
   RecordSet record_set;
   MLMD_RETURN_IF_ERROR(executor_->SelectContextByTypeIDAndContextName(
-      type_id, name, &record_set));
+      type_id, name, groups, &record_set));
   const std::vector<int64_t> ids = ConvertToIds(record_set);
   if (ids.empty()) {
     return absl::NotFoundError(absl::StrCat(
@@ -2812,8 +2810,7 @@ absl::Status RDBMSMetadataAccessObject::FindContextByTypeIdAndContextName(
   }
 
   std::vector<Context> contexts;
-  std::vector<std::string> groups = {""};
-  MLMD_RETURN_IF_ERROR(FindNodesImpl(ids, /*skipped_ids_ok=*/false, contexts, absl::MakeSpan(groups)));
+  MLMD_RETURN_IF_ERROR(FindNodesImpl(ids, /*skipped_ids_ok=*/false, contexts, groups));
   *context = contexts[0];
   return absl::OkStatus();
 }
