@@ -1034,16 +1034,19 @@ class QueryConfigExecutor : public QueryExecutor {
 
   absl::Status CheckTablesIn_V0_13_2() final;
 
-  absl::Status SelectAllArtifactIDs(RecordSet* set) final {
-    return ExecuteQuery("select `id` from `Artifact`;", set);
+  absl::Status SelectAllArtifactIDs(RecordSet* set, absl::Span<std::string> groups) final {
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
+    return ExecuteQuery(absl::StrCat("select `id` from `Artifact` WHERE `registry_group` IN (", Bind(absl::MakeSpan(groups_view)), ");"), set);
   }
 
-  absl::Status SelectAllExecutionIDs(RecordSet* set) final {
-    return ExecuteQuery("select `id` from `Execution`;", set);
+  absl::Status SelectAllExecutionIDs(RecordSet* set, absl::Span<std::string> groups) final {
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
+    return ExecuteQuery(absl::StrCat("select `id` from `Execution` WHERE `registry_group` IN (", Bind(absl::MakeSpan(groups_view)), ");"), set);
   }
 
-  absl::Status SelectAllContextIDs(RecordSet* set) final {
-    return ExecuteQuery("select `id` from `Context`;", set);
+  absl::Status SelectAllContextIDs(RecordSet* set, absl::Span<std::string> groups) final {
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
+    return ExecuteQuery(absl::StrCat("select `id` from `Context` WHERE `registry_group` IN (", Bind(absl::MakeSpan(groups_view)), ");"), set);
   }
 
   int64_t GetLibraryVersion() final {

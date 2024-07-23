@@ -292,19 +292,22 @@ class RDBMSMetadataAccessObject : public MetadataAccessObject {
       absl::Span<absl::string_view> external_ids,
       std::vector<Artifact>* artifacts) final;
 
-  absl::Status FindArtifacts(std::vector<Artifact>* artifacts) final;
+  absl::Status FindArtifacts(std::vector<Artifact>* artifacts, absl::Span<std::string> groups) final;
 
   absl::Status ListArtifacts(const ListOperationOptions& options,
                              std::vector<Artifact>* artifacts,
-                             std::string* next_page_token) final;
+                             std::string* next_page_token,
+                             absl::Span<std::string> groups) final;
 
   absl::Status ListExecutions(const ListOperationOptions& options,
                               std::vector<Execution>* executions,
-                              std::string* next_page_token) final;
+                              std::string* next_page_token,
+                              absl::Span<std::string> groups) final;
 
   absl::Status ListContexts(const ListOperationOptions& options,
                             std::vector<Context>* contexts,
-                            std::string* next_page_token) final;
+                            std::string* next_page_token,
+                            absl::Span<std::string> groups) final;
 
   absl::Status FindArtifactsByTypeId(
       int64_t artifact_type_id,
@@ -355,7 +358,7 @@ class RDBMSMetadataAccessObject : public MetadataAccessObject {
       absl::Span<absl::string_view> external_ids,
       std::vector<Execution>* executions) final;
 
-  absl::Status FindExecutions(std::vector<Execution>* executions) final;
+  absl::Status FindExecutions(std::vector<Execution>* executions, absl::Span<std::string> groups) final;
 
   absl::Status FindExecutionByTypeIdAndExecutionName(
       int64_t type_id, absl::string_view name, Execution* execution) final;
@@ -402,7 +405,7 @@ class RDBMSMetadataAccessObject : public MetadataAccessObject {
       absl::Span<absl::string_view> external_ids,
       std::vector<Context>* contexts) final;
 
-  absl::Status FindContexts(std::vector<Context>* contexts) final;
+  absl::Status FindContexts(std::vector<Context>* contexts, absl::Span<std::string> groups) final;
 
   absl::Status FindContextsByTypeId(
       int64_t type_id, absl::Span<std::string> groups,
@@ -925,7 +928,8 @@ class RDBMSMetadataAccessObject : public MetadataAccessObject {
   absl::Status ListNodes(const ListOperationOptions& options,
                          std::optional<absl::Span<const int64_t>> candidate_ids,
                          std::vector<Node>* nodes,
-                         std::string* next_page_token);
+                         std::string* next_page_token,
+                         absl::Span<std::string> groups);
 
   // Traverse a ParentContext relation to look for parent or child context.
   enum class ParentContextTraverseDirection { kParent, kChild };

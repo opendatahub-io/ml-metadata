@@ -336,7 +336,7 @@ class MetadataAccessObject {
 
   // Gets artifacts stored in the metadata source
   // Returns detailed INTERNAL error, if query execution fails.
-  virtual absl::Status FindArtifacts(std::vector<Artifact>* artifacts) = 0;
+  virtual absl::Status FindArtifacts(std::vector<Artifact>* artifacts, absl::Span<std::string> groups) = 0;
 
   // Gets artifacts stored in the metadata source using `options`.
   // `options` is the ListOperationOptions proto message defined
@@ -354,7 +354,8 @@ class MetadataAccessObject {
   // 3. next_page_token cannot be decoded.
   virtual absl::Status ListArtifacts(const ListOperationOptions& options,
                                      std::vector<Artifact>* artifacts,
-                                     std::string* next_page_token) = 0;
+                                     std::string* next_page_token,
+                                     absl::Span<std::string> groups) = 0;
 
   // Gets executions stored in the metadata source using `options`.
   // `options` is the ListOperationOptions proto message defined
@@ -372,7 +373,8 @@ class MetadataAccessObject {
   // 3. next_page_token cannot be decoded.
   virtual absl::Status ListExecutions(const ListOperationOptions& options,
                                       std::vector<Execution>* executions,
-                                      std::string* next_page_token) = 0;
+                                      std::string* next_page_token,
+                                      absl::Span<std::string> groups) = 0;
 
   // Gets contexts stored in the metadata source using `options`.
   // `options` is the ListOperationOptions proto message defined
@@ -390,7 +392,8 @@ class MetadataAccessObject {
   // 3. next_page_token cannot be decoded.
   virtual absl::Status ListContexts(const ListOperationOptions& options,
                                     std::vector<Context>* contexts,
-                                    std::string* next_page_token) = 0;
+                                    std::string* next_page_token,
+                                    absl::Span<std::string> groups) = 0;
 
   // Gets an artifact by its type_id and name.
   // Returns NOT_FOUND error, if no artifact can be found.
@@ -556,7 +559,7 @@ class MetadataAccessObject {
 
   // Gets executions stored in the metadata source
   // Returns detailed INTERNAL error, if query execution fails.
-  virtual absl::Status FindExecutions(std::vector<Execution>* executions) = 0;
+  virtual absl::Status FindExecutions(std::vector<Execution>* executions, absl::Span<std::string> groups) = 0;
 
   // Gets an execution by its type_id and name.
   // Returns NOT_FOUND error, if no execution can be found.
@@ -720,7 +723,7 @@ class MetadataAccessObject {
 
   // Gets contexts stored in the metadata source
   // Returns detailed INTERNAL error, if query execution fails.
-  virtual absl::Status FindContexts(std::vector<Context>* contexts) = 0;
+  virtual absl::Status FindContexts(std::vector<Context>* contexts, absl::Span<std::string> groups) = 0;
 
   // Gets contexts by a given type_id.
   // Returns NOT_FOUND error, if no context can be found.

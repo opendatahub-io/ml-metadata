@@ -337,7 +337,8 @@ class MetadataStore : public MetadataStoreServiceInterface {
   // Gets Artifacts using list options.
   // If option is not set in the request, then all Artifacts are returned.
   // Returns detailed INTERNAL error, if query execution fails.
-  absl::Status GetArtifacts(const GetArtifactsRequest& request,
+  absl::Status GetArtifacts(const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
+                            const GetArtifactsRequest& request,
                             GetArtifactsResponse* response) override;
 
   // Gets a list of artifacts using external_ids.
@@ -381,7 +382,8 @@ class MetadataStore : public MetadataStoreServiceInterface {
   // Gets Executions using list options.
   // If option is not set in the request, then all Executions are returned.
   // Returns detailed INTERNAL error, if query execution fails.
-  absl::Status GetExecutions(const GetExecutionsRequest& request,
+  absl::Status GetExecutions(const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
+                            const GetExecutionsRequest& request,
                              GetExecutionsResponse* response) override;
 
   // Gets all the executions of a given type. If no executions found, it returns
@@ -419,7 +421,8 @@ class MetadataStore : public MetadataStoreServiceInterface {
   // Retrieve Contexts using list options.
   // If option is not set in the request, then all Contexts are returned.
   // Returns detailed INTERNAL error, if query execution fails.
-  absl::Status GetContexts(const GetContextsRequest& request,
+  absl::Status GetContexts(const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
+                           const GetContextsRequest& request,
                            GetContextsResponse* response) override;
 
   // Gets all the contexts of a given type. If no contexts found, it returns

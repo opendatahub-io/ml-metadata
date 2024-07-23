@@ -2282,11 +2282,11 @@ absl::Status RDBMSMetadataAccessObject::FindExecutionsByContext(
   if (ids.empty()) {
     return absl::OkStatus();
   }
+  std::vector<std::string> groups = {""};
   if (list_options.has_value()) {
     return ListNodes<Execution>(list_options.value(), ids, executions,
-                                next_page_token);
+                                next_page_token, absl::MakeSpan(groups));
   }
-  std::vector<std::string> groups = {""};
   return FindNodesImpl(ids, /*skipped_ids_ok=*/false, *executions, absl::MakeSpan(groups));
 }
 
@@ -2365,11 +2365,11 @@ absl::Status RDBMSMetadataAccessObject::FindArtifactsByContext(
   if (ids.empty()) {
     return absl::OkStatus();
   }
+  std::vector<std::string> groups = {""};
   if (list_options.has_value()) {
     return ListNodes<Artifact>(list_options.value(), ids, artifacts,
-                               next_page_token);
+                               next_page_token, absl::MakeSpan(groups));
   }
-  std::vector<std::string> groups = {""};
   return FindNodesImpl(ids, /*skipped_ids_ok=*/false, *artifacts, absl::MakeSpan(groups));
 }
 
@@ -2545,15 +2545,14 @@ absl::Status RDBMSMetadataAccessObject::FindChildContextsByContextIds(
 }
 
 absl::Status RDBMSMetadataAccessObject::FindArtifacts(
-    std::vector<Artifact>* artifacts) {
+    std::vector<Artifact>* artifacts, absl::Span<std::string> groups) {
   RecordSet record_set;
-  MLMD_RETURN_IF_ERROR(executor_->SelectAllArtifactIDs(&record_set));
+  MLMD_RETURN_IF_ERROR(executor_->SelectAllArtifactIDs(&record_set, groups));
   std::vector<int64_t> ids = ConvertToIds(record_set);
   if (ids.empty()) {
     return absl::OkStatus();
   }
-  std::vector<std::string> groups = {""};
-  return FindNodesImpl(ids, /*skipped_ids_ok=*/false, *artifacts, absl::MakeSpan(groups));
+  return FindNodesImpl(ids, /*skipped_ids_ok=*/false, *artifacts, groups);
 }
 
 template <>
@@ -2587,7 +2586,8 @@ template <typename Node>
 absl::Status RDBMSMetadataAccessObject::ListNodes(
     const ListOperationOptions& options,
     std::optional<absl::Span<const int64_t>> candidate_ids,
-    std::vector<Node>* nodes, std::string* next_page_token) {
+    std::vector<Node>* nodes, std::string* next_page_token,
+    absl::Span<std::string> groups) {
   if (options.max_result_size() <= 0) {
     return absl::InvalidArgumentError(
         absl::StrCat("max_result_size field value is required to be greater "
@@ -2616,9 +2616,8 @@ absl::Status RDBMSMetadataAccessObject::ListNodes(
   for (int i = 0; i < ids.size(); ++i) {
     position_by_id[ids.at(i)] = i;
   }
-  std::vector<std::string> groups = {""};
   // Retrieve nodes
-  MLMD_RETURN_IF_ERROR(FindNodesImpl(ids, /*skipped_ids_ok=*/false, *nodes, absl::MakeSpan(groups)));
+  MLMD_RETURN_IF_ERROR(FindNodesImpl(ids, /*skipped_ids_ok=*/false, *nodes, groups));
 
   // Sort nodes in the right order
   absl::c_sort(*nodes, [&](const Node& a, const Node& b) {
@@ -2638,22 +2637,22 @@ absl::Status RDBMSMetadataAccessObject::ListNodes(
 
 absl::Status RDBMSMetadataAccessObject::ListArtifacts(
     const ListOperationOptions& options, std::vector<Artifact>* artifacts,
-    std::string* next_page_token) {
+    std::string* next_page_token, absl::Span<std::string> groups) {
   return ListNodes<Artifact>(options, absl::nullopt, artifacts,
-                             next_page_token);
+                             next_page_token, groups);
 }
 
 absl::Status RDBMSMetadataAccessObject::ListExecutions(
     const ListOperationOptions& options, std::vector<Execution>* executions,
-    std::string* next_page_token) {
+    std::string* next_page_token, absl::Span<std::string> groups) {
   return ListNodes<Execution>(options, absl::nullopt, executions,
-                              next_page_token);
+                              next_page_token, groups);
 }
 
 absl::Status RDBMSMetadataAccessObject::ListContexts(
     const ListOperationOptions& options, std::vector<Context>* contexts,
-    std::string* next_page_token) {
-  return ListNodes<Context>(options, absl::nullopt, contexts, next_page_token);
+    std::string* next_page_token, absl::Span<std::string> groups) {
+  return ListNodes<Context>(options, absl::nullopt, contexts, next_page_token, groups);
 }
 
 absl::Status RDBMSMetadataAccessObject::FindArtifactByTypeIdAndArtifactName(
@@ -2691,23 +2690,21 @@ absl::Status RDBMSMetadataAccessObject::FindArtifactsByTypeId(
   }
   if (list_options) {
     return ListNodes<Artifact>(list_options.value(), ids, artifacts,
-                               next_page_token);
+                               next_page_token, groups);
   } else {
-  std::vector<std::string> groups = {""};
-    return FindNodesImpl(ids, /*skipped_ids_ok=*/false, *artifacts, absl::MakeSpan(groups));
+    return FindNodesImpl(ids, /*skipped_ids_ok=*/false, *artifacts, groups);
   }
 }
 
 absl::Status RDBMSMetadataAccessObject::FindExecutions(
-    std::vector<Execution>* executions) {
+    std::vector<Execution>* executions, absl::Span<std::string> groups) {
   RecordSet record_set;
-  MLMD_RETURN_IF_ERROR(executor_->SelectAllExecutionIDs(&record_set));
+  MLMD_RETURN_IF_ERROR(executor_->SelectAllExecutionIDs(&record_set, groups));
   const std::vector<int64_t> ids = ConvertToIds(record_set);
   if (ids.empty()) {
     return absl::OkStatus();
   }
-  std::vector<std::string> groups = {""};
-  return FindNodesImpl(ids, /*skipped_ids_ok=*/false, *executions, absl::MakeSpan(groups));
+  return FindNodesImpl(ids, /*skipped_ids_ok=*/false, *executions, groups);
 }
 
 absl::Status RDBMSMetadataAccessObject::FindExecutionByTypeIdAndExecutionName(
@@ -2746,23 +2743,21 @@ absl::Status RDBMSMetadataAccessObject::FindExecutionsByTypeId(
   }
   if (list_options) {
     return ListNodes<Execution>(list_options.value(), ids, executions,
-                                next_page_token);
+                                next_page_token, groups);
   } else {
-    std::vector<std::string> groups = {""};
-    return FindNodesImpl(ids, /*skipped_ids_ok=*/false, *executions, absl::MakeSpan(groups));
+    return FindNodesImpl(ids, /*skipped_ids_ok=*/false, *executions, groups);
   }
 }
 
 absl::Status RDBMSMetadataAccessObject::FindContexts(
-    std::vector<Context>* contexts) {
+    std::vector<Context>* contexts, absl::Span<std::string> groups) {
   RecordSet record_set;
-  MLMD_RETURN_IF_ERROR(executor_->SelectAllContextIDs(&record_set));
+  MLMD_RETURN_IF_ERROR(executor_->SelectAllContextIDs(&record_set, groups));
   const std::vector<int64_t> ids = ConvertToIds(record_set);
   if (ids.empty()) {
     return absl::OkStatus();
   }
-  std::vector<std::string> groups = {""};
-  return FindNodesImpl(ids, /*skipped_ids_ok=*/false, *contexts, absl::MakeSpan(groups));
+  return FindNodesImpl(ids, /*skipped_ids_ok=*/false, *contexts, groups);
 }
 
 absl::Status RDBMSMetadataAccessObject::FindContextsByTypeId(
@@ -2775,13 +2770,11 @@ absl::Status RDBMSMetadataAccessObject::FindContextsByTypeId(
     return absl::NotFoundError(
         absl::StrCat("No contexts found with type_id: ", type_id));
   }
-
   if (list_options) {
     return ListNodes<Context>(list_options.value(), ids, contexts,
-                              next_page_token);
+                              next_page_token, groups);
   } else {
-    std::vector<std::string> groups = {""};
-    return FindNodesImpl(ids, /*skipped_ids_ok=*/false, *contexts, absl::MakeSpan(groups));
+    return FindNodesImpl(ids, /*skipped_ids_ok=*/false, *contexts, groups);
   }
 }
 

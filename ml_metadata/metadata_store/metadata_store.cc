@@ -1534,19 +1534,21 @@ absl::Status MetadataStore::GetEventsByArtifactIDs(
       request.transaction_options());
 }
 
-absl::Status MetadataStore::GetExecutions(const GetExecutionsRequest& request,
+absl::Status MetadataStore::GetExecutions(const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
+                                          const GetExecutionsRequest& request,
                                           GetExecutionsResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
         std::vector<Execution> executions;
         absl::Status status;
         std::string next_page_token;
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         if (request.has_options()) {
           status = metadata_access_object_->ListExecutions(
-              request.options(), &executions, &next_page_token);
+              request.options(), &executions, &next_page_token, absl::MakeSpan(groups));
         } else {
-          status = metadata_access_object_->FindExecutions(&executions);
+          status = metadata_access_object_->FindExecutions(&executions, absl::MakeSpan(groups));
         }
 
         if (absl::IsNotFound(status)) {
@@ -1567,19 +1569,21 @@ absl::Status MetadataStore::GetExecutions(const GetExecutionsRequest& request,
       request.transaction_options());
 }
 
-absl::Status MetadataStore::GetArtifacts(const GetArtifactsRequest& request,
+absl::Status MetadataStore::GetArtifacts(const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
+                                         const GetArtifactsRequest& request,
                                          GetArtifactsResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
         std::vector<Artifact> artifacts;
         absl::Status status;
         std::string next_page_token;
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         if (request.has_options()) {
           status = metadata_access_object_->ListArtifacts(
-              request.options(), &artifacts, &next_page_token);
+              request.options(), &artifacts, &next_page_token, absl::MakeSpan(groups));
         } else {
-          status = metadata_access_object_->FindArtifacts(&artifacts);
+          status = metadata_access_object_->FindArtifacts(&artifacts, absl::MakeSpan(groups));
         }
 
         if (absl::IsNotFound(status)) {
@@ -1601,19 +1605,21 @@ absl::Status MetadataStore::GetArtifacts(const GetArtifactsRequest& request,
       request.transaction_options());
 }
 
-absl::Status MetadataStore::GetContexts(const GetContextsRequest& request,
+absl::Status MetadataStore::GetContexts(const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
+                                        const GetContextsRequest& request,
                                         GetContextsResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
         std::vector<Context> contexts;
         absl::Status status;
         std::string next_page_token;
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         if (request.has_options()) {
           status = metadata_access_object_->ListContexts(
-              request.options(), &contexts, &next_page_token);
+              request.options(), &contexts, &next_page_token, absl::MakeSpan(groups));
         } else {
-          status = metadata_access_object_->FindContexts(&contexts);
+          status = metadata_access_object_->FindContexts(&contexts, absl::MakeSpan(groups));
         }
 
         if (absl::IsNotFound(status)) {

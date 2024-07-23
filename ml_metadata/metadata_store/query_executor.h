@@ -620,15 +620,15 @@ class QueryExecutor {
   // Note: these are not reflected in the original queries.
   // Select all artifact IDs.
   // Returns a list of IDs.
-  virtual absl::Status SelectAllArtifactIDs(RecordSet* set) = 0;
+  virtual absl::Status SelectAllArtifactIDs(RecordSet* set, absl::Span<std::string> groups) = 0;
 
   // Select all execution IDs.
   // Returns a list of IDs.
-  virtual absl::Status SelectAllExecutionIDs(RecordSet* set) = 0;
+  virtual absl::Status SelectAllExecutionIDs(RecordSet* set, absl::Span<std::string> groups) = 0;
 
   // Select all context IDs.
   // Returns a list of IDs.
-  virtual absl::Status SelectAllContextIDs(RecordSet* set) = 0;
+  virtual absl::Status SelectAllContextIDs(RecordSet* set, absl::Span<std::string> groups) = 0;
 
   // List Artifact IDs using `options`. If `candidate_ids` is provided, then
   // returned result is only built using ids in the `candidate_ids`, when
