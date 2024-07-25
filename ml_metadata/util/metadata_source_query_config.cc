@@ -248,8 +248,8 @@ R"pb(
     parameter_num: 1
   }
   select_artifacts_by_external_ids {
-    query: " SELECT `id` from `Artifact` WHERE `external_id` IN ($0); "
-    parameter_num: 1
+    query: " SELECT `id` from `Artifact` WHERE `external_id` IN ($0) and `registry_group` IN ($1); "
+    parameter_num: 2
   }
   update_artifact {
     query: " UPDATE `Artifact` "
@@ -365,8 +365,8 @@ R"pb(
     parameter_num: 2
   }
   select_executions_by_external_ids {
-    query: " SELECT `id` from `Execution` WHERE `external_id` IN ($0);"
-    parameter_num: 1
+    query: " SELECT `id` from `Execution` WHERE `external_id` IN ($0) and `registry_group` IN ($1);"
+    parameter_num: 2
   }
   update_execution {
     query: " UPDATE `Execution` "
@@ -480,8 +480,8 @@ R"pb(
     parameter_num: 3
   }
   select_contexts_by_external_ids {
-    query: " SELECT `id` from `Context` WHERE `external_id` IN ($0); "
-    parameter_num: 1
+    query: " SELECT `id` from `Context` WHERE `external_id` IN ($0) and `registry_group` IN ($1); "
+    parameter_num: 2
   }
   update_context {
     query: " UPDATE `Context` "
@@ -5004,8 +5004,8 @@ R"pb(
     parameter_num: 1
   }
   select_artifacts_by_external_ids {
-    query: " SELECT id FROM Artifact WHERE external_id IN ($0); "
-    parameter_num: 1
+    query: " SELECT id FROM Artifact WHERE external_id IN ($0) and registry_group IN ($1); "
+    parameter_num: 2
   }
   update_artifact {
     query: " UPDATE Artifact "
@@ -5133,8 +5133,8 @@ R"pb(
     parameter_num: 2
   }
   select_executions_by_external_ids {
-    query: " SELECT id FROM Execution WHERE external_id IN ($0);"
-    parameter_num: 1
+    query: " SELECT id FROM Execution WHERE external_id IN ($0) and registry_group IN ($1);"
+    parameter_num: 2
   }
   update_execution {
     query: " UPDATE Execution "
@@ -5260,8 +5260,8 @@ R"pb(
     parameter_num: 3
   }
   select_contexts_by_external_ids {
-    query: " SELECT id FROM Context WHERE external_id IN ($0); "
-    parameter_num: 1
+    query: " SELECT id FROM Context WHERE external_id IN ($0) and registry_group IN ($1); "
+    parameter_num: 2
   }
   update_context {
     query: " UPDATE Context "

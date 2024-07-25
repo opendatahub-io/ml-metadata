@@ -347,6 +347,7 @@ class MetadataStore : public MetadataStoreServiceInterface {
   // Returns NOT_FOUND error, if the given external_ids are not found.
   // Returns detailed INTERNAL error, if query execution fails.
   absl::Status GetArtifactsByExternalIds(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
       const GetArtifactsByExternalIdsRequest& request,
       GetArtifactsByExternalIdsResponse* response) override;
 
@@ -409,6 +410,7 @@ class MetadataStore : public MetadataStoreServiceInterface {
   // Returns NOT_FOUND error, if the given external_ids are not found.
   // Returns detailed INTERNAL error, if query execution fails.
   absl::Status GetExecutionsByExternalIds(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
       const GetExecutionsByExternalIdsRequest& request,
       GetExecutionsByExternalIdsResponse* response) override;
 
@@ -449,6 +451,7 @@ class MetadataStore : public MetadataStoreServiceInterface {
   // Returns NOT_FOUND error, if the given external_ids are not found.
   // Returns detailed INTERNAL error, if query execution fails.
   absl::Status GetContextsByExternalIds(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
       const GetContextsByExternalIdsRequest& request,
       GetContextsByExternalIdsResponse* response) override;
 

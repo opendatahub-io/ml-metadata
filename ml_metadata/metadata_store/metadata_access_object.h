@@ -331,7 +331,7 @@ class MetadataAccessObject {
   // Returns INVALID_ARGUMENT error, if any of the |external_ids| is empty.
   // Returns detailed INTERNAL error, if query execution fails.
   virtual absl::Status FindArtifactsByExternalIds(
-      absl::Span<absl::string_view> external_ids,
+      absl::Span<absl::string_view> external_ids, absl::Span<std::string> groups,
       std::vector<Artifact>* artifacts) = 0;
 
   // Gets artifacts stored in the metadata source
@@ -554,7 +554,7 @@ class MetadataAccessObject {
   // Returns INVALID_ARGUMENT error, if any of the |external_ids| is empty.
   // Returns detailed INTERNAL error, if query execution fails.
   virtual absl::Status FindExecutionsByExternalIds(
-      absl::Span<absl::string_view> external_ids,
+      absl::Span<absl::string_view> external_ids, absl::Span<std::string> groups,
       std::vector<Execution>* executions) = 0;
 
   // Gets executions stored in the metadata source
@@ -718,7 +718,7 @@ class MetadataAccessObject {
   // Returns INVALID_ARGUMENT error, if any of the |external_ids| is empty.
   // Returns detailed INTERNAL error if query execution fails.
   virtual absl::Status FindContextsByExternalIds(
-      absl::Span<absl::string_view> external_ids,
+      absl::Span<absl::string_view> external_ids, absl::Span<std::string> groups,
       std::vector<Context>* contexts) = 0;
 
   // Gets contexts stored in the metadata source

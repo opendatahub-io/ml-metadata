@@ -289,7 +289,7 @@ class RDBMSMetadataAccessObject : public MetadataAccessObject {
       std::vector<ArtifactType>& artifact_types, absl::Span<std::string> groups) final;
 
   absl::Status FindArtifactsByExternalIds(
-      absl::Span<absl::string_view> external_ids,
+      absl::Span<absl::string_view> external_ids, absl::Span<std::string> groups,
       std::vector<Artifact>* artifacts) final;
 
   absl::Status FindArtifacts(std::vector<Artifact>* artifacts, absl::Span<std::string> groups) final;
@@ -356,7 +356,7 @@ class RDBMSMetadataAccessObject : public MetadataAccessObject {
                                   std::vector<Execution>* executions, absl::Span<std::string> groups) final;
 
   absl::Status FindExecutionsByExternalIds(
-      absl::Span<absl::string_view> external_ids,
+      absl::Span<absl::string_view> external_ids, absl::Span<std::string> groups,
       std::vector<Execution>* executions) final;
 
   absl::Status FindExecutions(std::vector<Execution>* executions, absl::Span<std::string> groups) final;
@@ -403,7 +403,7 @@ class RDBMSMetadataAccessObject : public MetadataAccessObject {
                                 std::vector<Context>* contexts) final;
 
   absl::Status FindContextsByExternalIds(
-      absl::Span<absl::string_view> external_ids,
+      absl::Span<absl::string_view> external_ids, absl::Span<std::string> groups,
       std::vector<Context>* contexts) final;
 
   absl::Status FindContexts(std::vector<Context>* contexts, absl::Span<std::string> groups) final;

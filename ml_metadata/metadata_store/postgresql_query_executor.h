@@ -188,11 +188,12 @@ class PostgreSQLQueryExecutor : public QueryExecutor {
   }
 
   absl::Status SelectArtifactsByExternalIds(
-      absl::Span<absl::string_view> external_ids, RecordSet* record_set) {
+      absl::Span<absl::string_view> external_ids, absl::Span<std::string> groups, RecordSet* record_set) {
     MLMD_RETURN_IF_ERROR(
         VerifyCurrentQueryVersionIsAtLeast(kSchemaVersionNine));
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
     return ExecuteQuery(query_config_.select_artifacts_by_external_ids(),
-                        {Bind(external_ids)}, record_set);
+                        {Bind(external_ids), Bind(absl::MakeSpan(groups_view))}, record_set);
   }
 
   absl::Status SelectArtifactByTypeIDAndArtifactName(
@@ -289,12 +290,13 @@ class PostgreSQLQueryExecutor : public QueryExecutor {
                         {Bind(execution_ids), Bind(absl::MakeSpan(groups_view))}, record_set);
   }
 
-  absl::Status SelectExecutionsByExternalIds(absl::Span<absl::string_view> ids,
+  absl::Status SelectExecutionsByExternalIds(absl::Span<absl::string_view> ids, absl::Span<std::string> groups,
                                              RecordSet* record_set) final {
     MLMD_RETURN_IF_ERROR(
         VerifyCurrentQueryVersionIsAtLeast(kSchemaVersionNine));
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
     return ExecuteQuery(query_config_.select_executions_by_external_ids(),
-                        {Bind(ids)}, record_set);
+                        {Bind(ids), Bind(absl::MakeSpan(groups_view))}, record_set);
   }
 
   absl::Status SelectExecutionByTypeIDAndExecutionName(
@@ -383,11 +385,12 @@ class PostgreSQLQueryExecutor : public QueryExecutor {
   }
 
   absl::Status SelectContextsByExternalIds(
-      absl::Span<absl::string_view> external_ids, RecordSet* record_set) final {
+      absl::Span<absl::string_view> external_ids, absl::Span<std::string> groups, RecordSet* record_set) final {
     MLMD_RETURN_IF_ERROR(
         VerifyCurrentQueryVersionIsAtLeast(kSchemaVersionNine));
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
     return ExecuteQuery(query_config_.select_contexts_by_external_ids(),
-                        {Bind(external_ids)}, record_set);
+                        {Bind(external_ids), Bind(absl::MakeSpan(groups_view))}, record_set);
   }
 
   absl::Status SelectContextsByTypeID(int64_t context_type_id,

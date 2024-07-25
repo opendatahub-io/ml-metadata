@@ -1899,7 +1899,7 @@ absl::Status RDBMSMetadataAccessObject::FindContextsById(
 }
 
 absl::Status RDBMSMetadataAccessObject::FindArtifactsByExternalIds(
-    absl::Span<absl::string_view> external_ids,
+    absl::Span<absl::string_view> external_ids, absl::Span<std::string> groups, 
     std::vector<Artifact>* artifacts) {
   if (external_ids.empty()) {
     return absl::OkStatus();
@@ -1912,19 +1912,18 @@ absl::Status RDBMSMetadataAccessObject::FindArtifactsByExternalIds(
   }
   RecordSet record_set;
   MLMD_RETURN_IF_ERROR(
-      executor_->SelectArtifactsByExternalIds(external_ids, &record_set));
+      executor_->SelectArtifactsByExternalIds(external_ids, groups, &record_set));
   const std::vector<int64_t> ids = ConvertToIds(record_set);
   if (ids.empty()) {
     return absl::NotFoundError(
         absl::StrCat("No artifacts found for external_ids."));
   }
-    std::vector<std::string> groups = {""};
 
-  return FindNodesImpl(ids, /*skipped_ids_ok=*/false, *artifacts, absl::MakeSpan(groups));
+  return FindNodesImpl(ids, /*skipped_ids_ok=*/false, *artifacts, groups);
 }
 
 absl::Status RDBMSMetadataAccessObject::FindExecutionsByExternalIds(
-    absl::Span<absl::string_view> external_ids,
+    absl::Span<absl::string_view> external_ids, absl::Span<std::string> groups,
     std::vector<Execution>* executions) {
   if (external_ids.empty()) {
     return absl::OkStatus();
@@ -1937,18 +1936,17 @@ absl::Status RDBMSMetadataAccessObject::FindExecutionsByExternalIds(
   }
   RecordSet record_set;
   MLMD_RETURN_IF_ERROR(
-      executor_->SelectExecutionsByExternalIds(external_ids, &record_set));
+      executor_->SelectExecutionsByExternalIds(external_ids, groups, &record_set));
   const std::vector<int64_t> ids = ConvertToIds(record_set);
   if (ids.empty()) {
     return absl::NotFoundError(
         absl::StrCat("No executions found for external_ids."));
   }
-  std::vector<std::string> groups = {""};
-  return FindNodesImpl(ids, /*skipped_ids_ok=*/false, *executions, absl::MakeSpan(groups));
+  return FindNodesImpl(ids, /*skipped_ids_ok=*/false, *executions, groups);
 }
 
 absl::Status RDBMSMetadataAccessObject::FindContextsByExternalIds(
-    absl::Span<absl::string_view> external_ids,
+    absl::Span<absl::string_view> external_ids, absl::Span<std::string> groups,
     std::vector<Context>* contexts) {
   if (external_ids.empty()) {
     return absl::OkStatus();
@@ -1961,14 +1959,13 @@ absl::Status RDBMSMetadataAccessObject::FindContextsByExternalIds(
   }
   RecordSet record_set;
   MLMD_RETURN_IF_ERROR(
-      executor_->SelectContextsByExternalIds(external_ids, &record_set));
+      executor_->SelectContextsByExternalIds(external_ids, groups, &record_set));
   const std::vector<int64_t> ids = ConvertToIds(record_set);
   if (ids.empty()) {
     return absl::NotFoundError(
         absl::StrCat("No contexts found for external_ids."));
   }
-  std::vector<std::string> groups = {""};
-  return FindNodesImpl(ids, /*skipped_ids_ok=*/false, *contexts, absl::MakeSpan(groups));
+  return FindNodesImpl(ids, /*skipped_ids_ok=*/false, *contexts, groups);
 }
 
 absl::Status RDBMSMetadataAccessObject::UpdateArtifact(

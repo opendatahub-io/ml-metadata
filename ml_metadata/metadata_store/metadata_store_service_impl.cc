@@ -565,8 +565,10 @@ MetadataStoreServiceImpl::MetadataStoreServiceImpl(
                  << connection_status.error_message();
     return connection_status;
   }
+  const std::multimap<grpc::string_ref, grpc::string_ref> MetadataContext =
+        context->client_metadata();
   const ::grpc::Status transaction_status = ToGRPCStatus(
-      metadata_store->GetArtifactsByExternalIds(*request, response));
+      metadata_store->GetArtifactsByExternalIds(&MetadataContext, *request, response));
   if (!transaction_status.ok()) {
     LOG(WARNING) << "GetArtifactsByExternalIds failed: "
                  << transaction_status.error_message();
@@ -586,8 +588,10 @@ MetadataStoreServiceImpl::MetadataStoreServiceImpl(
                  << connection_status.error_message();
     return connection_status;
   }
+  const std::multimap<grpc::string_ref, grpc::string_ref> MetadataContext =
+        context->client_metadata();
   const ::grpc::Status transaction_status = ToGRPCStatus(
-      metadata_store->GetExecutionsByExternalIds(*request, response));
+      metadata_store->GetExecutionsByExternalIds(&MetadataContext, *request, response));
   if (!transaction_status.ok()) {
     LOG(WARNING) << "GetExecutionsByExternalIds failed: "
                  << transaction_status.error_message();
@@ -607,8 +611,10 @@ MetadataStoreServiceImpl::MetadataStoreServiceImpl(
                  << connection_status.error_message();
     return connection_status;
   }
+  const std::multimap<grpc::string_ref, grpc::string_ref> MetadataContext =
+        context->client_metadata();
   const ::grpc::Status transaction_status = ToGRPCStatus(
-      metadata_store->GetContextsByExternalIds(*request, response));
+      metadata_store->GetContextsByExternalIds(&MetadataContext, *request, response));
   if (!transaction_status.ok()) {
     LOG(WARNING) << "GetContextsByExternalIds failed: "
                  << transaction_status.error_message();

@@ -317,10 +317,13 @@ absl::Status UpsertArtifact(const Artifact& artifact,
       artifact.has_external_id() && !artifact.external_id().empty()) {
     std::vector<absl::string_view> artifact_external_ids = {
         artifact.external_id()};
+    std::vector<std::string> artifact_groups = {
+      artifact.registry_group()
+    };
     std::vector<Artifact> artifacts;
     const absl::Status status =
         metadata_access_object->FindArtifactsByExternalIds(
-            absl::MakeSpan(artifact_external_ids), &artifacts);
+            absl::MakeSpan(artifact_external_ids), absl::MakeSpan(artifact_groups), &artifacts);
     if (!absl::IsNotFound(status)) {
       MLMD_RETURN_IF_ERROR(status);
       // Found the artifact by external_id. Use it as artifact_id to return.
@@ -548,14 +551,18 @@ absl::Status GetExternalIdToIdMapping(
     MetadataAccessObject* metadata_access_object,
     absl::flat_hash_map<std::string, int64_t>& output_external_id_to_id_map) {
   std::vector<absl::string_view> external_ids;
+  std::vector<std::string> groups;
   for (const Artifact& artifact : artifacts) {
     if (artifact.has_external_id() && !artifact.external_id().empty()) {
       external_ids.push_back(absl::string_view(artifact.external_id()));
     }
+    if(artifact.has_registry_group() && !artifact.registry_group().empty()) {
+      groups.push_back(artifact.registry_group());
+    }
   }
   std::vector<Artifact> artifacts_to_reuse;
   absl::Status status = metadata_access_object->FindArtifactsByExternalIds(
-      absl::MakeSpan(external_ids), &artifacts_to_reuse);
+      absl::MakeSpan(external_ids), absl::MakeSpan(groups), &artifacts_to_reuse);
   if (!(status.ok() || absl::IsNotFound(status))) {
     return status;
   }
@@ -1866,10 +1873,11 @@ absl::Status MetadataStore::GetArtifactByTypeAndName(
 }
 
 absl::Status MetadataStore::GetArtifactsByExternalIds(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
     const GetArtifactsByExternalIdsRequest& request,
     GetArtifactsByExternalIdsResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
         std::vector<absl::string_view> external_ids;
         std::transform(request.external_ids().begin(),
@@ -1878,10 +1886,11 @@ absl::Status MetadataStore::GetArtifactsByExternalIds(
                        [](const std::string& external_id) {
                          return absl::string_view(external_id);
                        });
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         std::vector<Artifact> artifacts;
         MLMD_RETURN_IF_ERROR(
             metadata_access_object_->FindArtifactsByExternalIds(
-                absl::MakeSpan(external_ids), &artifacts));
+                absl::MakeSpan(external_ids), absl::MakeSpan(groups), &artifacts));
         for (const Artifact& artifact : artifacts) {
           *response->mutable_artifacts()->Add() = artifact;
         }
@@ -1965,10 +1974,11 @@ absl::Status MetadataStore::GetExecutionByTypeAndName(
 }
 
 absl::Status MetadataStore::GetExecutionsByExternalIds(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
     const GetExecutionsByExternalIdsRequest& request,
     GetExecutionsByExternalIdsResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
         std::vector<absl::string_view> external_ids;
         std::transform(request.external_ids().begin(),
@@ -1977,10 +1987,11 @@ absl::Status MetadataStore::GetExecutionsByExternalIds(
                        [](const std::string& external_id) {
                          return absl::string_view(external_id);
                        });
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         std::vector<Execution> executions;
         MLMD_RETURN_IF_ERROR(
             metadata_access_object_->FindExecutionsByExternalIds(
-                absl::MakeSpan(external_ids), &executions));
+                absl::MakeSpan(external_ids), absl::MakeSpan(groups), &executions));
         for (const Execution& execution : executions) {
           *response->mutable_executions()->Add() = execution;
         }
@@ -2070,10 +2081,11 @@ absl::Status MetadataStore::GetContextByTypeAndName(
 }
 
 absl::Status MetadataStore::GetContextsByExternalIds(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
     const GetContextsByExternalIdsRequest& request,
     GetContextsByExternalIdsResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
         std::vector<absl::string_view> external_ids;
         std::transform(request.external_ids().begin(),
@@ -2082,9 +2094,10 @@ absl::Status MetadataStore::GetContextsByExternalIds(
                        [](const std::string& external_id) {
                          return absl::string_view(external_id);
                        });
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         std::vector<Context> contexts;
         MLMD_RETURN_IF_ERROR(metadata_access_object_->FindContextsByExternalIds(
-            absl::MakeSpan(external_ids), &contexts));
+            absl::MakeSpan(external_ids), absl::MakeSpan(groups), &contexts));
         for (const Context& context : contexts) {
           *response->mutable_contexts()->Add() = context;
         }
