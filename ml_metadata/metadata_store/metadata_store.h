@@ -370,7 +370,8 @@ class MetadataStore : public MetadataStoreServiceInterface {
   // Gets all the artifacts matching the given URIs. If no artifacts found, it
   // returns OK and empty response.
   // Returns detailed INTERNAL error, if query execution fails.
-  absl::Status GetArtifactsByURI(const GetArtifactsByURIRequest& request,
+  absl::Status GetArtifactsByURI(const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
+                                 const GetArtifactsByURIRequest& request,
                                  GetArtifactsByURIResponse* response) override;
 
   // Gets a list of executions by ID.

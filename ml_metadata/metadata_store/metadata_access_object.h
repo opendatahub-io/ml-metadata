@@ -414,6 +414,7 @@ class MetadataAccessObject {
   // Returns NOT_FOUND error, if the given uri cannot be found.
   // Returns detailed INTERNAL error, if query execution fails.
   virtual absl::Status FindArtifactsByURI(absl::string_view uri,
+                                          absl::Span<std::string> groups,
                                           std::vector<Artifact>* artifacts) = 0;
 
   // Updates an artifact.

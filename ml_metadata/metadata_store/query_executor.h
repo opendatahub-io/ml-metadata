@@ -326,6 +326,7 @@ class QueryExecutor {
   // Gets an artifact from the database by its uri.
   // Returns a list of artifact IDs.
   virtual absl::Status SelectArtifactsByURI(absl::string_view uri,
+                                            absl::Span<std::string> groups,
                                             RecordSet* record_set) = 0;
 
   // Updates an artifact in the database.

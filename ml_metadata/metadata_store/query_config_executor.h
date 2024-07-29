@@ -517,8 +517,10 @@ class QueryConfigExecutor : public QueryExecutor {
   }
 
   absl::Status SelectArtifactsByURI(absl::string_view uri,
+                                    absl::Span<std::string> groups,
                                     RecordSet* record_set) final {
-    return ExecuteQuery(query_config_.select_artifacts_by_uri(), {Bind(uri)},
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
+    return ExecuteQuery(query_config_.select_artifacts_by_uri(), {Bind(uri), Bind(absl::MakeSpan(groups_view))},
                         record_set);
   }
 

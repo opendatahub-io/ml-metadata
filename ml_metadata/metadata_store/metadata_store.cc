@@ -1741,6 +1741,7 @@ absl::Status MetadataStore::GetContextTypes(
 }
 
 absl::Status MetadataStore::GetArtifactsByURI(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
     const GetArtifactsByURIRequest& request,
     GetArtifactsByURIResponse* response) {
   // Validate if there's already deprecated optional string uri = 1 field.
@@ -1756,14 +1757,15 @@ absl::Status MetadataStore::GetArtifactsByURI(
     }
   }
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         absl::flat_hash_set<std::string> uris(request.uris().begin(),
                                               request.uris().end());
         for (const std::string& uri : uris) {
           std::vector<Artifact> artifacts;
           const absl::Status status =
-              metadata_access_object_->FindArtifactsByURI(uri, &artifacts);
+              metadata_access_object_->FindArtifactsByURI(uri, absl::MakeSpan(groups), &artifacts);
           if (!status.ok() && !absl::IsNotFound(status)) {
             // If any none NotFound error returned, we do early stopping as
             // the query execution has internal db errors.

@@ -321,6 +321,7 @@ class RDBMSMetadataAccessObject : public MetadataAccessObject {
                                                    absl::Span<std::string> groups) final;
 
   absl::Status FindArtifactsByURI(absl::string_view uri,
+                                  absl::Span<std::string> groups,
                                   std::vector<Artifact>* artifacts) final;
 
   absl::Status UpdateArtifact(const Artifact& artifact) final;

@@ -244,8 +244,8 @@ R"pb(
     parameter_num: 2
   }
   select_artifacts_by_uri {
-    query: " SELECT `id` from `Artifact` WHERE `uri` = $0; "
-    parameter_num: 1
+    query: " SELECT `id` from `Artifact` WHERE `uri` = $0 and `registry_group` IN ($1); "
+    parameter_num: 2
   }
   select_artifacts_by_external_ids {
     query: " SELECT `id` from `Artifact` WHERE `external_id` IN ($0) and `registry_group` IN ($1); "
@@ -5000,8 +5000,8 @@ R"pb(
     parameter_num: 2
   }
   select_artifacts_by_uri {
-    query: " SELECT id FROM Artifact WHERE uri = $0; "
-    parameter_num: 1
+    query: " SELECT id FROM Artifact WHERE uri = $0 and registry_group IN ($1); "
+    parameter_num: 2
   }
   select_artifacts_by_external_ids {
     query: " SELECT id FROM Artifact WHERE external_id IN ($0) and registry_group IN ($1); "

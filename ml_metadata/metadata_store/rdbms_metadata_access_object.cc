@@ -2774,16 +2774,15 @@ absl::Status RDBMSMetadataAccessObject::FindContextsByTypeId(
 }
 
 absl::Status RDBMSMetadataAccessObject::FindArtifactsByURI(
-    absl::string_view uri, std::vector<Artifact>* artifacts) {
+    absl::string_view uri, absl::Span<std::string> groups, std::vector<Artifact>* artifacts) {
   RecordSet record_set;
-  MLMD_RETURN_IF_ERROR(executor_->SelectArtifactsByURI(uri, &record_set));
+  MLMD_RETURN_IF_ERROR(executor_->SelectArtifactsByURI(uri, groups, &record_set));
   const std::vector<int64_t> ids = ConvertToIds(record_set);
   if (ids.empty()) {
     return absl::NotFoundError(
         absl::StrCat("No artifacts found for uri:", uri));
   }
-  std::vector<std::string> groups = {""};
-  return FindNodesImpl(ids, /*skipped_ids_ok=*/false, *artifacts, absl::MakeSpan(groups));
+  return FindNodesImpl(ids, /*skipped_ids_ok=*/false, *artifacts, groups);
 }
 
 absl::Status RDBMSMetadataAccessObject::FindContextByTypeIdAndContextName(
