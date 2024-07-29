@@ -396,8 +396,10 @@ MetadataStoreServiceImpl::MetadataStoreServiceImpl(
                  << connection_status.error_message();
     return connection_status;
   }
+  const std::multimap<grpc::string_ref, grpc::string_ref> MetadataContext =
+        context->client_metadata();
   const ::grpc::Status transaction_status =
-      ToGRPCStatus(metadata_store->PutEvents(*request, response));
+      ToGRPCStatus(metadata_store->PutEvents(&MetadataContext, *request, response));
   if (!transaction_status.ok()) {
     LOG(WARNING) << "PutEvents failed: " << transaction_status.error_message();
   }
@@ -436,8 +438,10 @@ MetadataStoreServiceImpl::MetadataStoreServiceImpl(
                  << connection_status.error_message();
     return connection_status;
   }
+  const std::multimap<grpc::string_ref, grpc::string_ref> MetadataContext =
+        context->client_metadata();
   const ::grpc::Status transaction_status =
-      ToGRPCStatus(metadata_store->GetEventsByArtifactIDs(*request, response));
+      ToGRPCStatus(metadata_store->GetEventsByArtifactIDs(&MetadataContext, *request, response));
   if (!transaction_status.ok()) {
     LOG(WARNING) << "GetEventsByArtifactIDs failed: "
                  << transaction_status.error_message();
@@ -457,8 +461,10 @@ MetadataStoreServiceImpl::MetadataStoreServiceImpl(
                  << connection_status.error_message();
     return connection_status;
   }
+  const std::multimap<grpc::string_ref, grpc::string_ref> MetadataContext =
+        context->client_metadata();
   const ::grpc::Status transaction_status =
-      ToGRPCStatus(metadata_store->GetEventsByExecutionIDs(*request, response));
+      ToGRPCStatus(metadata_store->GetEventsByExecutionIDs(&MetadataContext, *request, response));
   if (!transaction_status.ok()) {
     LOG(WARNING) << "GetEventsByExecutionIDs failed: "
                  << transaction_status.error_message();

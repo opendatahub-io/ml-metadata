@@ -434,15 +434,17 @@ class RDBMSMetadataAccessObject : public MetadataAccessObject {
                              bool force_update_time,
                              const google::protobuf::FieldMask& mask) final;
 
-  absl::Status CreateEvent(const Event& event, int64_t* event_id) final;
+  absl::Status CreateEvent(const Event& event, absl::Span<std::string> groups, int64_t* event_id) final;
 
-  absl::Status CreateEvent(const Event& event, bool is_already_validated,
+  absl::Status CreateEvent(const Event& event, absl::Span<std::string> groups, bool is_already_validated,
                            int64_t* event_id) final;
 
   absl::Status FindEventsByArtifacts(absl::Span<const int64_t> artifact_ids,
+                                     absl::Span<std::string> groups,
                                      std::vector<Event>* events) final;
 
   absl::Status FindEventsByExecutions(absl::Span<const int64_t> execution_ids,
+                                      absl::Span<std::string> groups,
                                       std::vector<Event>* events) final;
 
   absl::Status CreateAssociation(const Association& association,

@@ -812,7 +812,7 @@ class MetadataAccessObject {
   // docstring for CreateEvent() with the `is_already_validated` flag for more
   // details. This method assumes the event has not been validated yet and sets
   // `is_already_validated` to false.
-  virtual absl::Status CreateEvent(const Event& event, int64_t* event_id) = 0;
+  virtual absl::Status CreateEvent(const Event& event, absl::Span<std::string> groups, int64_t* event_id) = 0;
 
   // Creates an event, returns the assigned event id. If the event occurrence
   // time is not given, the insertion time is used. If the event's execution
@@ -825,21 +825,21 @@ class MetadataAccessObject {
   // Returns ALREADY_EXIST error, if duplicated event is found.
   // TODO(b/197686185): Deprecate this method once foreign keys schema is
   // implemented.
-  virtual absl::Status CreateEvent(const Event& event,
-                                   bool is_already_validated,
+  virtual absl::Status CreateEvent(const Event& event, absl::Span<std::string> groups,
+                                   bool is_already_validated, 
                                    int64_t* event_id) = 0;
 
   // Gets the events associated with a collection of artifact_ids.
   // Returns NOT_FOUND error, if no `events` can be found.
   // Returns INVALID_ARGUMENT error, if the `events` is null.
   virtual absl::Status FindEventsByArtifacts(
-      absl::Span<const int64_t> artifact_ids, std::vector<Event>* events) = 0;
+      absl::Span<const int64_t> artifact_ids, absl::Span<std::string> groups, std::vector<Event>* events) = 0;
 
   // Gets the events associated with a collection of execution_ids.
   // Returns NOT_FOUND error, if no `events` can be found.
   // Returns INVALID_ARGUMENT error, if the `events` is null.
   virtual absl::Status FindEventsByExecutions(
-      absl::Span<const int64_t> execution_ids, std::vector<Event>* events) = 0;
+      absl::Span<const int64_t> execution_ids, absl::Span<std::string> groups, std::vector<Event>* events) = 0;
 
   // Creates an association, and returns the assigned association id.
   // Please refer to the docstring for CreateAssociation() with the

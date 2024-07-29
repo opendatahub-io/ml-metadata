@@ -470,17 +470,19 @@ class PostgreSQLQueryExecutor : public QueryExecutor {
         event_id);
   }
 
-  absl::Status SelectEventByArtifactIDs(absl::Span<const int64_t> artifact_ids,
+  absl::Status SelectEventByArtifactIDs(absl::Span<const int64_t> artifact_ids, absl::Span<std::string> groups,
                                         RecordSet* event_record_set) final {
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
     return ExecuteQuery(query_config_.select_event_by_artifact_ids(),
-                        {Bind(artifact_ids)}, event_record_set);
+                        {Bind(artifact_ids), Bind(absl::MakeSpan(groups_view))}, event_record_set);
   }
 
   absl::Status SelectEventByExecutionIDs(
-      absl::Span<const int64_t> execution_ids,
+      absl::Span<const int64_t> execution_ids, absl::Span<std::string> groups,
       RecordSet* event_record_set) final {
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
     return ExecuteQuery(query_config_.select_event_by_execution_ids(),
-                        {Bind(execution_ids)}, event_record_set);
+                        {Bind(execution_ids), Bind(absl::MakeSpan(groups_view))}, event_record_set);
   }
 
   absl::Status CheckEventPathTable() final;

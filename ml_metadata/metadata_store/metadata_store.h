@@ -264,7 +264,7 @@ class MetadataStore : public MetadataStoreServiceInterface {
   // Returns INVALID_ARGUMENT error, if no execution matches the execution_id.
   // Returns INVALID_ARGUMENT error, if the type field is UNKNOWN.
   // Returns detailed INTERNAL error, if query execution fails.
-  absl::Status PutEvents(const PutEventsRequest& request,
+  absl::Status PutEvents(const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext, const PutEventsRequest& request,
                          PutEventsResponse* response) override;
 
   // Inserts or updates an Execution and its input and output artifacts and
@@ -317,12 +317,14 @@ class MetadataStore : public MetadataStoreServiceInterface {
   // Gets all events with matching execution ids.
   // Returns detailed INTERNAL error, if query execution fails.
   absl::Status GetEventsByExecutionIDs(
+      const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
       const GetEventsByExecutionIDsRequest& request,
       GetEventsByExecutionIDsResponse* response) override;
 
   // Gets all events with matching artifact ids.
   // Returns detailed INTERNAL error, if query execution fails.
   absl::Status GetEventsByArtifactIDs(
+      const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
       const GetEventsByArtifactIDsRequest& request,
       GetEventsByArtifactIDsResponse* response) override;
 

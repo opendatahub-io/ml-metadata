@@ -2050,13 +2050,13 @@ absl::Status RDBMSMetadataAccessObject::UpdateContext(
                                               force_update_time, mask);
 }
 
-absl::Status RDBMSMetadataAccessObject::CreateEvent(const Event& event,
+absl::Status RDBMSMetadataAccessObject::CreateEvent(const Event& event, absl::Span<std::string> groups,
                                                     int64_t* event_id) {
-  return CreateEvent(event, /*is_already_validated=*/false, event_id);
+  return CreateEvent(event, groups, /*is_already_validated=*/false, event_id);
 }
 
 absl::Status RDBMSMetadataAccessObject::CreateEvent(
-    const Event& event, const bool is_already_validated, int64_t* event_id) {
+    const Event& event, absl::Span<std::string> groups, const bool is_already_validated, int64_t* event_id) {
   // validate the given event
   if (!event.has_artifact_id())
     return absl::InvalidArgumentError("No artifact id is specified.");
@@ -2072,12 +2072,11 @@ absl::Status RDBMSMetadataAccessObject::CreateEvent(
   // foreign keys for artifact id and execution id
   if (!is_already_validated) {
     RecordSet artifacts;
-    std::vector<std::string> groups = {""};
     MLMD_RETURN_IF_ERROR(
-        executor_->SelectArtifactsByID({event.artifact_id()}, &artifacts, absl::MakeSpan(groups)));
+        executor_->SelectArtifactsByID({event.artifact_id()}, &artifacts, groups));
     RecordSet executions;
     MLMD_RETURN_IF_ERROR(
-        executor_->SelectExecutionsByID({event.execution_id()}, &executions, absl::MakeSpan(groups)));
+        executor_->SelectExecutionsByID({event.execution_id()}, &executions, groups));
     RecordSet record_set;
     if (artifacts.records_size() == 0)
       return absl::InvalidArgumentError(
@@ -2109,7 +2108,7 @@ absl::Status RDBMSMetadataAccessObject::CreateEvent(
 }
 
 absl::Status RDBMSMetadataAccessObject::FindEventsByArtifacts(
-    absl::Span<const int64_t> artifact_ids, std::vector<Event>* events) {
+    absl::Span<const int64_t> artifact_ids, absl::Span<std::string> groups, std::vector<Event>* events) {
   if (events == nullptr) {
     return absl::InvalidArgumentError("Given events is NULL.");
   }
@@ -2117,7 +2116,7 @@ absl::Status RDBMSMetadataAccessObject::FindEventsByArtifacts(
   RecordSet event_record_set;
   if (!artifact_ids.empty()) {
     MLMD_RETURN_IF_ERROR(
-        executor_->SelectEventByArtifactIDs(artifact_ids, &event_record_set));
+        executor_->SelectEventByArtifactIDs(artifact_ids, groups, &event_record_set));
   }
 
   if (event_record_set.records_size() == 0) {
@@ -2127,7 +2126,7 @@ absl::Status RDBMSMetadataAccessObject::FindEventsByArtifacts(
 }
 
 absl::Status RDBMSMetadataAccessObject::FindEventsByExecutions(
-    absl::Span<const int64_t> execution_ids, std::vector<Event>* events) {
+    absl::Span<const int64_t> execution_ids, absl::Span<std::string> groups, std::vector<Event>* events) {
   if (events == nullptr) {
     return absl::InvalidArgumentError("Given events is NULL.");
   }
@@ -2135,7 +2134,7 @@ absl::Status RDBMSMetadataAccessObject::FindEventsByExecutions(
   RecordSet event_record_set;
   if (!execution_ids.empty()) {
     MLMD_RETURN_IF_ERROR(
-        executor_->SelectEventByExecutionIDs(execution_ids, &event_record_set));
+        executor_->SelectEventByExecutionIDs(execution_ids, groups, &event_record_set));
   }
 
   if (event_record_set.records_size() == 0) {
@@ -2884,8 +2883,9 @@ absl::Status RDBMSMetadataAccessObject::ExpandLineageGraphImpl(
     input_artifact_ids[i] = input_artifacts[i].id();
     visited_artifact_ids.insert(input_artifact_ids[i]);
   }
+  std::vector<std::string> groups = {""};
   std::vector<Event> events;
-  const auto status = FindEventsByArtifacts(input_artifact_ids, &events);
+  const auto status = FindEventsByArtifacts(input_artifact_ids, absl::MakeSpan(groups), &events);
   // If no events are found for the given artifacts, directly return ok
   // status.
   if (absl::IsNotFound(status)) {
@@ -2930,10 +2930,11 @@ RDBMSMetadataAccessObject::ExpandLineageSubgraphImpl(
     std::vector<Event>& output_events) {
   // Step 1: filter events by direction.
   std::vector<Event> candidate_events;
+  std::vector<std::string> groups = {""};
   absl::Status status =
       expand_from_artifacts
-          ? FindEventsByArtifacts(input_node_ids, &candidate_events)
-          : FindEventsByExecutions(input_node_ids, &candidate_events);
+          ? FindEventsByArtifacts(input_node_ids, absl::MakeSpan(groups), &candidate_events)
+          : FindEventsByExecutions(input_node_ids, absl::MakeSpan(groups), &candidate_events);
   std::vector<Event> events = FilterEventsByDirectionAndEventType(
       candidate_events, /*is_from_artifact=*/expand_from_artifacts,
       options.direction());
@@ -3027,7 +3028,8 @@ absl::Status RDBMSMetadataAccessObject::ExpandLineageGraphImpl(
     visited_execution_ids.insert(input_execution_ids[i]);
   }
   std::vector<Event> events;
-  const auto status = FindEventsByExecutions(input_execution_ids, &events);
+  std::vector<std::string> groups = {""};
+  const auto status = FindEventsByExecutions(input_execution_ids, absl::MakeSpan(groups), &events);
   // If no events are found for the given executions, directly return ok
   // status.
   if (absl::IsNotFound(status)) {

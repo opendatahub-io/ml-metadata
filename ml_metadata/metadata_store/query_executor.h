@@ -509,11 +509,11 @@ class QueryExecutor {
 
   // Gets events from the Event table by a collection of artifact ids.
   virtual absl::Status SelectEventByArtifactIDs(
-      absl::Span<const int64_t> artifact_ids, RecordSet* event_record_set) = 0;
+      absl::Span<const int64_t> artifact_ids, absl::Span<std::string> groups, RecordSet* event_record_set) = 0;
 
   // Gets events from the Event table by a collection of execution ids.
   virtual absl::Status SelectEventByExecutionIDs(
-      absl::Span<const int64_t> execution_ids, RecordSet* event_record_set) = 0;
+      absl::Span<const int64_t> execution_ids, absl::Span<std::string> groups, RecordSet* event_record_set) = 0;
 
   // Checks the existence of the EventPath table.
   virtual absl::Status CheckEventPathTable() = 0;

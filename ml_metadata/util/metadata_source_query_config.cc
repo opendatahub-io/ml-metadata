@@ -614,18 +614,20 @@ R"pb(
     parameter_num: 4
   }
   select_event_by_artifact_ids {
-    query: " SELECT `id`, `artifact_id`, `execution_id`, "
-           "        `type`, `milliseconds_since_epoch` "
-           " from `Event` "
-           " WHERE `artifact_id` IN ($0); "
-    parameter_num: 1
+    query: " SELECT `E.id`, `E.artifact_id`, `E.execution_id`, "
+           "        `E.type`, `E.milliseconds_since_epoch` "
+           " FROM `Event` AS E "
+           " LEFT JOIN `Artifact` AS A ON (E.artifact_id = A.id)"
+           " WHERE `artifact_id` IN ($0) AND `registry_group` IN ($1); "
+    parameter_num: 2
   }
   select_event_by_execution_ids {
-    query: " SELECT `id`, `artifact_id`, `execution_id`, "
-           "        `type`, `milliseconds_since_epoch` "
-           " from `Event` "
-           " WHERE `execution_id` IN ($0); "
-    parameter_num: 1
+    query: " SELECT `E.id`, `E.artifact_id`, `E.execution_id`, "
+           "        `E.type`, `E.milliseconds_since_epoch` "
+           " FROM `Event` AS E "
+           " LEFT JOIN `Execution` AS X ON (E.execution_id = X.id)"
+           " WHERE `execution_id` IN ($0) AND `registry_group` IN ($1); "
+    parameter_num: 2
   }
   drop_event_path_table { query: " DROP TABLE IF EXISTS `EventPath`; " }
   create_event_path_table {
@@ -5411,18 +5413,20 @@ R"pb(
     parameter_num: 4
   }
   select_event_by_artifact_ids {
-    query: " SELECT id, artifact_id, execution_id, "
-           "        type, milliseconds_since_epoch "
-           " FROM Event "
-           " WHERE artifact_id IN ($0); "
-    parameter_num: 1
+    query: " SELECT E.id, E.artifact_id, E.execution_id, "
+           "        E.type, E.milliseconds_since_epoch "
+           " FROM Event AS E "
+           " LEFT JOIN Artifact AS X ON (E.artifact_id = X.id)"
+           " WHERE artifact_id IN ($0) AND registry_group IN ($1); "
+    parameter_num: 2
   }
   select_event_by_execution_ids {
-    query: " SELECT id, artifact_id, execution_id, "
-           "        type, milliseconds_since_epoch "
-           " FROM Event "
-           " WHERE execution_id IN ($0); "
-    parameter_num: 1
+    query: " SELECT E.id, E.artifact_id, E.execution_id, "
+           "        E.type, E.milliseconds_since_epoch "
+           " FROM Event AS E "
+           " LEFT JOIN Execution AS X ON (E.execution_id = X.id)"
+           " WHERE execution_id IN ($0) AND registry_group IN ($1); "
+    parameter_num: 2
   }
   drop_event_path_table { query: " DROP TABLE IF EXISTS EventPath; " }
   create_event_path_table {

@@ -535,11 +535,11 @@ absl::Status InsertEvent(
                      "artifact_id: ",
                      artifact_and_event.DebugString()));
   }
-
+  std::vector<std::string> groups = {artifact_and_event.artifact().registry_group()};
   // Create an Event.
   int64_t dummy_event_id = -1;
   MLMD_RETURN_IF_ERROR(metadata_access_object->CreateEvent(
-      event,
+      event, absl::MakeSpan(groups),
       /*is_already_validated=*/true, &dummy_event_id));
 
   return absl::OkStatus();
@@ -1260,15 +1260,16 @@ absl::Status MetadataStore::Create(
   return absl::OkStatus();
 }
 
-absl::Status MetadataStore::PutEvents(const PutEventsRequest& request,
+absl::Status MetadataStore::PutEvents(const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext, const PutEventsRequest& request,
                                       PutEventsResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         for (const Event& event : request.events()) {
           int64_t dummy_event_id = -1;
           MLMD_RETURN_IF_ERROR(
-              metadata_access_object_->CreateEvent(event, &dummy_event_id));
+              metadata_access_object_->CreateEvent(event, absl::MakeSpan(groups), &dummy_event_id));
         }
         return absl::OkStatus();
       },
@@ -1481,10 +1482,10 @@ absl::Status MetadataStore::PutLineageSubgraph(
             event.set_artifact_id(
                 response->artifact_ids(event_edge.artifact_index()));
           }
-
+          std::vector<std::string> groups = {""};
           int64_t dummy_event_id = -1;
           MLMD_RETURN_IF_ERROR(metadata_access_object_->CreateEvent(
-              event, /*is_already_validated=*/true, &dummy_event_id));
+              event, absl::MakeSpan(groups), /*is_already_validated=*/true, &dummy_event_id));
         }
         return absl::OkStatus();
       },
@@ -1493,16 +1494,18 @@ absl::Status MetadataStore::PutLineageSubgraph(
 
 
 absl::Status MetadataStore::GetEventsByExecutionIDs(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
     const GetEventsByExecutionIDsRequest& request,
     GetEventsByExecutionIDsResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
         std::vector<Event> events;
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         const absl::Status status =
             metadata_access_object_->FindEventsByExecutions(
                 std::vector<int64_t>(request.execution_ids().begin(),
-                                     request.execution_ids().end()),
+                                     request.execution_ids().end()), absl::MakeSpan(groups),
                 &events);
         if (absl::IsNotFound(status)) {
           return absl::OkStatus();
@@ -1518,16 +1521,18 @@ absl::Status MetadataStore::GetEventsByExecutionIDs(
 }
 
 absl::Status MetadataStore::GetEventsByArtifactIDs(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
     const GetEventsByArtifactIDsRequest& request,
     GetEventsByArtifactIDsResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
         std::vector<Event> events;
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         const absl::Status status =
             metadata_access_object_->FindEventsByArtifacts(
                 std::vector<int64_t>(request.artifact_ids().begin(),
-                                     request.artifact_ids().end()),
+                                     request.artifact_ids().end()), absl::MakeSpan(groups),
                 &events);
         if (absl::IsNotFound(status)) {
           return absl::OkStatus();
