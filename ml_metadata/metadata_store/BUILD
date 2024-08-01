@@ -958,7 +958,7 @@ cc_library(
         "//ml_metadata/proto:metadata_store_proto",
         "@com_github_gflags_gflags//:gflags_nothreads",
         "@com_google_glog//:glog",
-        "@postgresql//:postgresql",
+        "@postgresql",
     ],
 )
 
@@ -979,7 +979,7 @@ cc_library(
         "//ml_metadata/proto:metadata_store_proto",
         "//ml_metadata/util:return_utils",
         "@com_google_glog//:glog",
-        "@postgresql//:postgresql",
+        "@postgresql",
     ],
 )
 
