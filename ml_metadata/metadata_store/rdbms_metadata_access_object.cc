@@ -431,8 +431,9 @@ absl::Status AddAncestors<ParentContext>(
     int64_t ancestor_id, std::vector<int64_t>& ancestor_ids,
     std::unique_ptr<QueryExecutor>& executor) {
   RecordSet record_set;
+  std::vector<std::string> groups = {""};
   MLMD_RETURN_IF_ERROR(
-      executor->SelectParentContextsByContextID(ancestor_id, &record_set));
+      executor->SelectParentContextsByContextID(ancestor_id, absl::MakeSpan(groups), &record_set));
   for (const int64_t parent_id :
        ParentContextsToContextIds(record_set, /*is_parent=*/true)) {
     ancestor_ids.push_back(parent_id);
@@ -2195,11 +2196,11 @@ absl::Status RDBMSMetadataAccessObject::FindAssociationsByContexts(
     return absl::InvalidArgumentError(
         "Given input associations vector is NULL.");
   }
-
+  std::vector<std::string> groups = {""};
   RecordSet association_record_set;
   if (!context_ids.empty()) {
     MLMD_RETURN_IF_ERROR(executor_->SelectAssociationByContextIDs(
-        context_ids, &association_record_set));
+        context_ids, absl::MakeSpan(groups), &association_record_set));
   }
 
   if (association_record_set.records_size() == 0) {
@@ -2248,7 +2249,7 @@ absl::Status RDBMSMetadataAccessObject::FindAttributionsByArtifacts(
 }
 
 absl::Status RDBMSMetadataAccessObject::FindContextsByExecution(
-    int64_t execution_id, std::vector<Context>* contexts) {
+    int64_t execution_id, absl::Span<std::string> groups, std::vector<Context>* contexts) {
   RecordSet record_set;
   MLMD_RETURN_IF_ERROR(
       executor_->SelectAssociationsByExecutionIds({execution_id}, &record_set));
@@ -2257,33 +2258,31 @@ absl::Status RDBMSMetadataAccessObject::FindContextsByExecution(
     return absl::NotFoundError(
         absl::StrCat("No contexts found for execution_id: ", execution_id));
   }
-  std::vector<std::string> groups = {""};
-  return FindNodesImpl(context_ids, /*skipped_ids_ok=*/false, *contexts, absl::MakeSpan(groups));
+  return FindNodesImpl(context_ids, /*skipped_ids_ok=*/false, *contexts, groups);
 }
 
 absl::Status RDBMSMetadataAccessObject::FindExecutionsByContext(
-    int64_t context_id, std::vector<Execution>* executions) {
+    int64_t context_id, absl::Span<std::string> groups, std::vector<Execution>* executions) {
   std::string unused_next_page_toke;
-  return FindExecutionsByContext(context_id, absl::nullopt, executions,
+  return FindExecutionsByContext(context_id, absl::nullopt, groups, executions,
                                  &unused_next_page_toke);
 }
 
 absl::Status RDBMSMetadataAccessObject::FindExecutionsByContext(
-    int64_t context_id, std::optional<ListOperationOptions> list_options,
+    int64_t context_id, std::optional<ListOperationOptions> list_options, absl::Span<std::string> groups,
     std::vector<Execution>* executions, std::string* next_page_token) {
   RecordSet record_set;
   MLMD_RETURN_IF_ERROR(
-      executor_->SelectAssociationByContextIDs({context_id}, &record_set));
+      executor_->SelectAssociationByContextIDs({context_id}, groups, &record_set));
   const std::vector<int64_t> ids = AssociationsToExecutionIds(record_set);
   if (ids.empty()) {
     return absl::OkStatus();
   }
-  std::vector<std::string> groups = {""};
   if (list_options.has_value()) {
     return ListNodes<Execution>(list_options.value(), ids, executions,
-                                next_page_token, absl::MakeSpan(groups));
+                                next_page_token, groups);
   }
-  return FindNodesImpl(ids, /*skipped_ids_ok=*/false, *executions, absl::MakeSpan(groups));
+  return FindNodesImpl(ids, /*skipped_ids_ok=*/false, *executions, groups);
 }
 
 absl::Status RDBMSMetadataAccessObject::CreateAttribution(
@@ -2331,7 +2330,7 @@ absl::Status RDBMSMetadataAccessObject::CreateAttribution(
 }
 
 absl::Status RDBMSMetadataAccessObject::FindContextsByArtifact(
-    int64_t artifact_id, std::vector<Context>* contexts) {
+    int64_t artifact_id, absl::Span<std::string> groups, std::vector<Context>* contexts) {
   RecordSet record_set;
   MLMD_RETURN_IF_ERROR(
       executor_->SelectAttributionsByArtifactIds({artifact_id}, &record_set));
@@ -2340,31 +2339,29 @@ absl::Status RDBMSMetadataAccessObject::FindContextsByArtifact(
     return absl::NotFoundError(
         absl::StrCat("No contexts found for artifact_id: ", artifact_id));
   }
-  std::vector<std::string> groups = {""};
-  return FindNodesImpl(context_ids, /*skipped_ids_ok=*/false, *contexts, absl::MakeSpan(groups));
+  return FindNodesImpl(context_ids, /*skipped_ids_ok=*/false, *contexts, groups);
 }
 
 absl::Status RDBMSMetadataAccessObject::FindArtifactsByContext(
-    int64_t context_id, std::vector<Artifact>* artifacts) {
+    int64_t context_id, absl::Span<std::string> groups, std::vector<Artifact>* artifacts) {
   std::string unused_next_page_token;
-  return FindArtifactsByContext(context_id, absl::nullopt, artifacts,
+  return FindArtifactsByContext(context_id, absl::nullopt, groups, artifacts,
                                 &unused_next_page_token);
 }
 
 absl::Status RDBMSMetadataAccessObject::FindArtifactsByContext(
-    int64_t context_id, std::optional<ListOperationOptions> list_options,
+    int64_t context_id, std::optional<ListOperationOptions> list_options, absl::Span<std::string> groups,
     std::vector<Artifact>* artifacts, std::string* next_page_token) {
   RecordSet record_set;
   MLMD_RETURN_IF_ERROR(
-      executor_->SelectAttributionByContextID(context_id, &record_set));
+      executor_->SelectAttributionByContextID(context_id, groups, &record_set));
   const std::vector<int64_t> ids = AttributionsToArtifactIds(record_set);
   if (ids.empty()) {
     return absl::OkStatus();
   }
-  std::vector<std::string> groups = {""};
   if (list_options.has_value()) {
     return ListNodes<Artifact>(list_options.value(), ids, artifacts,
-                               next_page_token, absl::MakeSpan(groups));
+                               next_page_token, groups);
   }
   return FindNodesImpl(ids, /*skipped_ids_ok=*/false, *artifacts, absl::MakeSpan(groups));
 }
@@ -2399,17 +2396,16 @@ RDBMSMetadataAccessObject::FindContextIdsByArtifactsAndExecutions(
 }
 
 absl::Status RDBMSMetadataAccessObject::CreateParentContext(
-    const ParentContext& parent_context) {
+    const ParentContext& parent_context, absl::Span<std::string> groups) {
   if (!parent_context.has_parent_id() || !parent_context.has_child_id()) {
     return absl::InvalidArgumentError(
         absl::StrCat("Missing parent / child id in the parent_context: ",
                      parent_context.DebugString()));
   }
   RecordSet contexts_id_header;
-  std::vector<std::string> groups = {""};
   MLMD_RETURN_IF_ERROR(executor_->SelectContextsByID(
       {parent_context.parent_id(), parent_context.child_id()},
-      &contexts_id_header, absl::MakeSpan(groups)));
+      &contexts_id_header, groups));
   if (contexts_id_header.records_size() < 2) {
     return absl::InvalidArgumentError(absl::StrCat(
         "Given parent / child id in the parent_context cannot be found: ",
@@ -2429,15 +2425,15 @@ absl::Status RDBMSMetadataAccessObject::CreateParentContext(
 }
 
 absl::Status RDBMSMetadataAccessObject::FindLinkedContextsImpl(
-    int64_t context_id, ParentContextTraverseDirection direction,
+    int64_t context_id, ParentContextTraverseDirection direction, absl::Span<std::string> groups,
     std::vector<Context>& output_contexts) {
   RecordSet record_set;
   if (direction == ParentContextTraverseDirection::kParent) {
     MLMD_RETURN_IF_ERROR(
-        executor_->SelectParentContextsByContextID(context_id, &record_set));
+        executor_->SelectParentContextsByContextID(context_id, groups, &record_set));
   } else if (direction == ParentContextTraverseDirection::kChild) {
     MLMD_RETURN_IF_ERROR(
-        executor_->SelectChildContextsByContextID(context_id, &record_set));
+        executor_->SelectChildContextsByContextID(context_id, groups, &record_set));
   } else {
     return absl::InternalError("Unexpected ParentContext direction");
   }
@@ -2448,13 +2444,13 @@ absl::Status RDBMSMetadataAccessObject::FindLinkedContextsImpl(
   if (ids.empty()) {
     return absl::OkStatus();
   }
-  std::vector<std::string> groups = {""};
-  return FindNodesImpl(ids, /*skipped_ids_ok=*/false, output_contexts, absl::MakeSpan(groups));
+  return FindNodesImpl(ids, /*skipped_ids_ok=*/false, output_contexts, groups);
 }
 
 absl::Status RDBMSMetadataAccessObject::FindLinkedContextsMapImpl(
     absl::Span<const int64_t> context_ids,
     ParentContextTraverseDirection direction,
+    absl::Span<std::string> groups,
     absl::node_hash_map<int64_t, std::vector<Context>>& output_contexts) {
   if (context_ids.empty()) {
     return absl::InvalidArgumentError("Given context_ids is empty.");
@@ -2462,10 +2458,10 @@ absl::Status RDBMSMetadataAccessObject::FindLinkedContextsMapImpl(
   RecordSet record_set;
   if (direction == ParentContextTraverseDirection::kParent) {
     MLMD_RETURN_IF_ERROR(
-        executor_->SelectParentContextsByContextIDs(context_ids, &record_set));
+        executor_->SelectParentContextsByContextIDs(context_ids, groups, &record_set));
   } else if (direction == ParentContextTraverseDirection::kChild) {
     MLMD_RETURN_IF_ERROR(
-        executor_->SelectChildContextsByContextIDs(context_ids, &record_set));
+        executor_->SelectChildContextsByContextIDs(context_ids, groups, &record_set));
   } else {
     return absl::InternalError("Unexpected ParentContext direction");
   }
@@ -2483,10 +2479,9 @@ absl::Status RDBMSMetadataAccessObject::FindLinkedContextsMapImpl(
   }
 
   std::vector<Context> linked_contexts;
-  std::vector<std::string> groups = {""};
   absl::Status result =
       FindNodesImpl(is_parent ? DedupIds(parent_ids) : DedupIds(ids),
-                    /*skipped_ids_ok=*/false, linked_contexts, absl::MakeSpan(groups));
+                    /*skipped_ids_ok=*/false, linked_contexts, groups);
   MLMD_RETURN_IF_ERROR(result);
 
   absl::flat_hash_map<int64_t, Context> id_map_to_linked_context;
@@ -2509,35 +2504,35 @@ absl::Status RDBMSMetadataAccessObject::FindLinkedContextsMapImpl(
 }
 
 absl::Status RDBMSMetadataAccessObject::FindParentContextsByContextId(
-    int64_t context_id, std::vector<Context>* contexts) {
+    int64_t context_id, absl::Span<std::string> groups, std::vector<Context>* contexts) {
   if (contexts == nullptr) {
     return absl::InvalidArgumentError("Given contexts is NULL.");
   }
   return FindLinkedContextsImpl(
-      context_id, ParentContextTraverseDirection::kParent, *contexts);
+      context_id, ParentContextTraverseDirection::kParent, groups, *contexts);
 }
 
 absl::Status RDBMSMetadataAccessObject::FindChildContextsByContextId(
-    int64_t context_id, std::vector<Context>* contexts) {
+    int64_t context_id, absl::Span<std::string> groups, std::vector<Context>* contexts) {
   if (contexts == nullptr) {
     return absl::InvalidArgumentError("Given contexts is NULL.");
   }
   return FindLinkedContextsImpl(
-      context_id, ParentContextTraverseDirection::kChild, *contexts);
+      context_id, ParentContextTraverseDirection::kChild, groups, *contexts);
 }
 
 absl::Status RDBMSMetadataAccessObject::FindParentContextsByContextIds(
-    absl::Span<const int64_t> context_ids,
+    absl::Span<const int64_t> context_ids, absl::Span<std::string> groups, 
     absl::node_hash_map<int64_t, std::vector<Context>>& contexts) {
   return FindLinkedContextsMapImpl(
-      context_ids, ParentContextTraverseDirection::kParent, contexts);
+      context_ids, ParentContextTraverseDirection::kParent, groups, contexts);
 }
 
 absl::Status RDBMSMetadataAccessObject::FindChildContextsByContextIds(
-    absl::Span<const int64_t> context_ids,
+    absl::Span<const int64_t> context_ids, absl::Span<std::string> groups,
     absl::node_hash_map<int64_t, std::vector<Context>>& contexts) {
   return FindLinkedContextsMapImpl(
-      context_ids, ParentContextTraverseDirection::kChild, contexts);
+      context_ids, ParentContextTraverseDirection::kChild, groups, contexts);
 }
 
 absl::Status RDBMSMetadataAccessObject::FindArtifacts(

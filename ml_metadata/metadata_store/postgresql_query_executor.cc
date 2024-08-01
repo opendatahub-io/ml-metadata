@@ -187,25 +187,27 @@ absl::Status PostgreSQLQueryExecutor::InsertParentContext(int64_t parent_id,
 }
 
 absl::Status PostgreSQLQueryExecutor::SelectParentContextsByContextIDs(
-    absl::Span<const int64_t> context_ids, RecordSet* record_set) {
+    absl::Span<const int64_t> context_ids, absl::Span<std::string> groups, RecordSet* record_set) {
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
   return ExecuteQuery(query_config_.select_parent_contexts_by_context_ids(),
-                      {Bind(context_ids)}, record_set);
+                      {Bind(context_ids), Bind(absl::MakeSpan(groups_view))}, record_set);
 }
 
 absl::Status PostgreSQLQueryExecutor::SelectChildContextsByContextIDs(
-    absl::Span<const int64_t> context_ids, RecordSet* record_set) {
+    absl::Span<const int64_t> context_ids, absl::Span<std::string> groups, RecordSet* record_set) {
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
   return ExecuteQuery(
       query_config_.select_parent_contexts_by_parent_context_ids(),
-      {Bind(context_ids)}, record_set);
+      {Bind(context_ids), Bind(absl::MakeSpan(groups_view))}, record_set);
 }
 
 absl::Status PostgreSQLQueryExecutor::SelectParentContextsByContextID(
-    int64_t context_id, RecordSet* record_set) {
-  return SelectParentContextsByContextIDs({context_id}, record_set);
+    int64_t context_id, absl::Span<std::string> groups, RecordSet* record_set) {
+  return SelectParentContextsByContextIDs({context_id}, groups, record_set);
 }
 absl::Status PostgreSQLQueryExecutor::SelectChildContextsByContextID(
-    int64_t context_id, RecordSet* record_set) {
-  return SelectChildContextsByContextIDs({context_id}, record_set);
+    int64_t context_id, absl::Span<std::string> groups, RecordSet* record_set) {
+  return SelectChildContextsByContextIDs({context_id}, groups, record_set);
 }
 
 absl::Status PostgreSQLQueryExecutor::GetSchemaVersion(int64_t* db_version) {

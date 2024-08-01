@@ -976,9 +976,10 @@ class QueryConfigExecutor : public QueryExecutor {
   }
 
   absl::Status SelectAssociationByContextIDs(
-      absl::Span<const int64_t> context_id, RecordSet* record_set) final {
+      absl::Span<const int64_t> context_id, absl::Span<std::string> groups, RecordSet* record_set) final {
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
     return ExecuteQuery(query_config_.select_association_by_context_id(),
-                        {Bind(context_id)}, record_set);
+                        {Bind(context_id), Bind(absl::MakeSpan(groups_view))}, record_set);
   }
 
   absl::Status SelectAssociationsByExecutionIds(
@@ -998,10 +999,11 @@ class QueryConfigExecutor : public QueryExecutor {
                                           attribution_id);
   }
 
-  absl::Status SelectAttributionByContextID(int64_t context_id,
+  absl::Status SelectAttributionByContextID(int64_t context_id, absl::Span<std::string> groups,
                                             RecordSet* record_set) final {
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
     return ExecuteQuery(query_config_.select_attribution_by_context_id(),
-                        {Bind(context_id)}, record_set);
+                        {Bind(context_id), Bind(absl::MakeSpan(groups_view))}, record_set);
   }
 
   absl::Status SelectAttributionsByArtifactIds(
@@ -1014,17 +1016,17 @@ class QueryConfigExecutor : public QueryExecutor {
 
   absl::Status InsertParentContext(int64_t parent_id, int64_t child_id) final;
 
-  absl::Status SelectParentContextsByContextID(int64_t context_id,
+  absl::Status SelectParentContextsByContextID(int64_t context_id, absl::Span<std::string> groups,
                                                RecordSet* record_set) final;
 
-  absl::Status SelectChildContextsByContextID(int64_t context_id,
+  absl::Status SelectChildContextsByContextID(int64_t context_id, absl::Span<std::string> groups,
                                               RecordSet* record_set) final;
 
   absl::Status SelectParentContextsByContextIDs(
-      absl::Span<const int64_t> context_ids, RecordSet* record_set) final;
+      absl::Span<const int64_t> context_ids, absl::Span<std::string> groups, RecordSet* record_set) final;
 
   absl::Status SelectChildContextsByContextIDs(
-      absl::Span<const int64_t> context_ids, RecordSet* record_set) final;
+      absl::Span<const int64_t> context_ids, absl::Span<std::string> groups, RecordSet* record_set) final;
 
   absl::Status CheckMLMDEnvTable() final {
     return ExecuteQuery(query_config_.check_mlmd_env_table());

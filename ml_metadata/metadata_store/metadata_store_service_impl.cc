@@ -901,8 +901,10 @@ const std::multimap<grpc::string_ref, grpc::string_ref> MetadataContext =
                  << connection_status.error_message();
     return connection_status;
   }
+  const std::multimap<grpc::string_ref, grpc::string_ref> MetadataContext =
+        context->client_metadata();
   const ::grpc::Status transaction_status =
-      ToGRPCStatus(metadata_store->PutParentContexts(*request, response));
+      ToGRPCStatus(metadata_store->PutParentContexts(&MetadataContext, *request, response));
   if (!transaction_status.ok()) {
     LOG(WARNING) << "PutParentContexts failed: "
                  << transaction_status.error_message();
@@ -921,8 +923,10 @@ const std::multimap<grpc::string_ref, grpc::string_ref> MetadataContext =
                  << connection_status.error_message();
     return connection_status;
   }
+  const std::multimap<grpc::string_ref, grpc::string_ref> MetadataContext =
+        context->client_metadata();
   const ::grpc::Status transaction_status =
-      ToGRPCStatus(metadata_store->GetContextsByArtifact(*request, response));
+      ToGRPCStatus(metadata_store->GetContextsByArtifact(&MetadataContext, *request, response));
   if (!transaction_status.ok()) {
     LOG(WARNING) << "GetContextsByArtifact failed: "
                  << transaction_status.error_message();
@@ -942,8 +946,10 @@ const std::multimap<grpc::string_ref, grpc::string_ref> MetadataContext =
                  << connection_status.error_message();
     return connection_status;
   }
+  const std::multimap<grpc::string_ref, grpc::string_ref> MetadataContext =
+        context->client_metadata();
   const ::grpc::Status transaction_status =
-      ToGRPCStatus(metadata_store->GetContextsByExecution(*request, response));
+      ToGRPCStatus(metadata_store->GetContextsByExecution(&MetadataContext, *request, response));
   if (!transaction_status.ok()) {
     LOG(WARNING) << "GetContextsByExecution failed: "
                  << transaction_status.error_message();
@@ -962,8 +968,10 @@ const std::multimap<grpc::string_ref, grpc::string_ref> MetadataContext =
                  << connection_status.error_message();
     return connection_status;
   }
+  const std::multimap<grpc::string_ref, grpc::string_ref> MetadataContext =
+        context->client_metadata();
   const ::grpc::Status transaction_status =
-      ToGRPCStatus(metadata_store->GetArtifactsByContext(*request, response));
+      ToGRPCStatus(metadata_store->GetArtifactsByContext(&MetadataContext, *request, response));
   if (!transaction_status.ok()) {
     LOG(WARNING) << "GetArtifactsByContext failed: "
                  << transaction_status.error_message();
@@ -983,8 +991,10 @@ const std::multimap<grpc::string_ref, grpc::string_ref> MetadataContext =
                  << connection_status.error_message();
     return connection_status;
   }
+  const std::multimap<grpc::string_ref, grpc::string_ref> MetadataContext =
+        context->client_metadata();
   const ::grpc::Status transaction_status =
-      ToGRPCStatus(metadata_store->GetExecutionsByContext(*request, response));
+      ToGRPCStatus(metadata_store->GetExecutionsByContext(&MetadataContext, *request, response));
   if (!transaction_status.ok()) {
     LOG(WARNING) << "GetExecutionsByContext failed: "
                  << transaction_status.error_message();
@@ -1004,8 +1014,10 @@ const std::multimap<grpc::string_ref, grpc::string_ref> MetadataContext =
                  << connection_status.error_message();
     return connection_status;
   }
+  const std::multimap<grpc::string_ref, grpc::string_ref> MetadataContext =
+        context->client_metadata();
   const ::grpc::Status transaction_status = ToGRPCStatus(
-      metadata_store->GetParentContextsByContext(*request, response));
+      metadata_store->GetParentContextsByContext(&MetadataContext, *request, response));
   if (!transaction_status.ok()) {
     LOG(WARNING) << "GetParentContextsByContext failed: "
                  << transaction_status.error_message();
@@ -1025,8 +1037,10 @@ const std::multimap<grpc::string_ref, grpc::string_ref> MetadataContext =
                  << connection_status.error_message();
     return connection_status;
   }
+  const std::multimap<grpc::string_ref, grpc::string_ref> MetadataContext =
+        context->client_metadata();
   const ::grpc::Status transaction_status = ToGRPCStatus(
-      metadata_store->GetChildrenContextsByContext(*request, response));
+      metadata_store->GetChildrenContextsByContext(&MetadataContext, *request, response));
   if (!transaction_status.ok()) {
     LOG(WARNING) << "GetChildrenContextsByContext failed: "
                  << transaction_status.error_message();

@@ -894,17 +894,17 @@ class MetadataAccessObject {
   // Gets the contexts that an execution_id is associated with.
   // Returns INVALID_ARGUMENT error, if the `contexts` is null.
   virtual absl::Status FindContextsByExecution(
-      int64_t execution_id, std::vector<Context>* contexts) = 0;
+      int64_t execution_id, absl::Span<std::string> groups, std::vector<Context>* contexts) = 0;
 
   // Gets the executions associated with a context_id.
   // Returns INVALID_ARGUMENT error, if the `executions` is null.
   virtual absl::Status FindExecutionsByContext(
-      int64_t context_id, std::vector<Execution>* executions) = 0;
+      int64_t context_id, absl::Span<std::string> groups, std::vector<Execution>* executions) = 0;
 
   // Gets the executions associated with a context_id.
   // Returns INVALID_ARGUMENT error, if the `executions` is null.
   virtual absl::Status FindExecutionsByContext(
-      int64_t context_id, std::optional<ListOperationOptions> list_options,
+      int64_t context_id, std::optional<ListOperationOptions> list_options, absl::Span<std::string> groups,
       std::vector<Execution>* executions, std::string* next_page_token) = 0;
 
   // Creates an attribution, and returns the assigned attribution id.
@@ -934,19 +934,19 @@ class MetadataAccessObject {
   // Gets the contexts that an artifact_id is attributed to.
   // Returns INVALID_ARGUMENT error, if the `contexts` is null.
   virtual absl::Status FindContextsByArtifact(
-      int64_t artifact_id, std::vector<Context>* contexts) = 0;
+      int64_t artifact_id, absl::Span<std::string> groups, std::vector<Context>* contexts) = 0;
 
   // Gets the artifacts attributed to a context_id.
   // Returns INVALID_ARGUMENT error, if the `artifacts` is null.
   virtual absl::Status FindArtifactsByContext(
-      int64_t context_id, std::vector<Artifact>* artifacts) = 0;
+      int64_t context_id, absl::Span<std::string> groups, std::vector<Artifact>* artifacts) = 0;
 
   // Gets the artifacts attributed to a context_id.
   // If `list_options` is specified then results are paginated based on the
   // fields set in `list_options`.
   // Returns INVALID_ARGUMENT error, if the `artifacts` is null.
   virtual absl::Status FindArtifactsByContext(
-      int64_t context_id, std::optional<ListOperationOptions> list_options,
+      int64_t context_id, std::optional<ListOperationOptions> list_options, absl::Span<std::string> groups,
       std::vector<Artifact>* artifacts, std::string* next_page_token) = 0;
 
   // Creates a parent context, returns OK if succeeds.
@@ -956,28 +956,28 @@ class MetadataAccessObject {
   // introduces cycle.
   // Returns ALREADY_EXISTS error, if the same parent context already exists.
   virtual absl::Status CreateParentContext(
-      const ParentContext& parent_context) = 0;
+      const ParentContext& parent_context, absl::Span<std::string> groups) = 0;
 
   // Gets the parent-contexts of a context_id.
   // Returns INVALID_ARGUMENT error, if the `contexts` is null.
   virtual absl::Status FindParentContextsByContextId(
-      int64_t context_id, std::vector<Context>* contexts) = 0;
+      int64_t context_id, absl::Span<std::string> groups, std::vector<Context>* contexts) = 0;
 
   // Gets the child-contexts of a context_id.
   // Returns INVALID_ARGUMENT error, if the `contexts` is null.
   virtual absl::Status FindChildContextsByContextId(
-      int64_t context_id, std::vector<Context>* contexts) = 0;
+      int64_t context_id, absl::Span<std::string> groups, std::vector<Context>* contexts) = 0;
 
   // Gets the parent-contexts of child context_ids list.
   // Returns INVALID_ARGUMENT error, if `context_ids` is empty.
   virtual absl::Status FindParentContextsByContextIds(
-      absl::Span<const int64_t> context_ids,
+      absl::Span<const int64_t> context_ids, absl::Span<std::string> groups,
       absl::node_hash_map<int64_t, std::vector<Context>>& contexts) = 0;
 
   // Gets the child-contexts of parent context_ids list.
   // Returns INVALID_ARGUMENT error, if `context_ids` is empty.
   virtual absl::Status FindChildContextsByContextIds(
-      absl::Span<const int64_t> context_ids,
+      absl::Span<const int64_t> context_ids, absl::Span<std::string> groups,
       absl::node_hash_map<int64_t, std::vector<Context>>& contexts) = 0;
 
   // Resolves the schema version stored in the metadata source. The `db_version`

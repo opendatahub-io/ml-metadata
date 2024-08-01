@@ -2135,14 +2135,16 @@ absl::Status MetadataStore::PutAttributionsAndAssociations(
 }
 
 absl::Status MetadataStore::PutParentContexts(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
     const PutParentContextsRequest& request,
     PutParentContextsResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         for (const ParentContext& parent_context : request.parent_contexts()) {
           MLMD_RETURN_IF_ERROR(
-              metadata_access_object_->CreateParentContext(parent_context));
+              metadata_access_object_->CreateParentContext(parent_context, absl::MakeSpan(groups)));
         }
         return absl::OkStatus();
       },
@@ -2150,14 +2152,16 @@ absl::Status MetadataStore::PutParentContexts(
 }
 
 absl::Status MetadataStore::GetContextsByArtifact(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
     const GetContextsByArtifactRequest& request,
     GetContextsByArtifactResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
         std::vector<Context> contexts;
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         MLMD_RETURN_IF_ERROR(metadata_access_object_->FindContextsByArtifact(
-            request.artifact_id(), &contexts));
+            request.artifact_id(), absl::MakeSpan(groups), &contexts));
         for (const Context& context : contexts) {
           *response->mutable_contexts()->Add() = context;
         }
@@ -2167,14 +2171,16 @@ absl::Status MetadataStore::GetContextsByArtifact(
 }
 
 absl::Status MetadataStore::GetContextsByExecution(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
     const GetContextsByExecutionRequest& request,
     GetContextsByExecutionResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         std::vector<Context> contexts;
         MLMD_RETURN_IF_ERROR(metadata_access_object_->FindContextsByExecution(
-            request.execution_id(), &contexts));
+            request.execution_id(), absl::MakeSpan(groups), &contexts));
         for (const Context& context : contexts) {
           *response->mutable_contexts()->Add() = context;
         }
@@ -2184,18 +2190,20 @@ absl::Status MetadataStore::GetContextsByExecution(
 }
 
 absl::Status MetadataStore::GetArtifactsByContext(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
     const GetArtifactsByContextRequest& request,
     GetArtifactsByContextResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         std::vector<Artifact> artifacts;
         std::string next_page_token;
         auto list_options = request.has_options()
                                 ? absl::make_optional(request.options())
                                 : absl::nullopt;
         MLMD_RETURN_IF_ERROR(metadata_access_object_->FindArtifactsByContext(
-            request.context_id(), list_options, &artifacts, &next_page_token));
+            request.context_id(), list_options, absl::MakeSpan(groups), &artifacts, &next_page_token));
 
         for (const Artifact& artifact : artifacts) {
           *response->mutable_artifacts()->Add() = artifact;
@@ -2211,11 +2219,13 @@ absl::Status MetadataStore::GetArtifactsByContext(
 }
 
 absl::Status MetadataStore::GetExecutionsByContext(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
     const GetExecutionsByContextRequest& request,
     GetExecutionsByContextResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         std::vector<Execution> executions;
         std::string next_page_token;
         auto list_options = request.has_options()
@@ -2223,7 +2233,7 @@ absl::Status MetadataStore::GetExecutionsByContext(
                                 : absl::nullopt;
 
         MLMD_RETURN_IF_ERROR(metadata_access_object_->FindExecutionsByContext(
-            request.context_id(), list_options, &executions, &next_page_token));
+            request.context_id(), list_options, absl::MakeSpan(groups), &executions, &next_page_token));
 
         for (const Execution& execution : executions) {
           *response->mutable_executions()->Add() = execution;
@@ -2239,15 +2249,17 @@ absl::Status MetadataStore::GetExecutionsByContext(
 }
 
 absl::Status MetadataStore::GetParentContextsByContext(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
     const GetParentContextsByContextRequest& request,
     GetParentContextsByContextResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         std::vector<Context> parent_contexts;
         const absl::Status status =
             metadata_access_object_->FindParentContextsByContextId(
-                request.context_id(), &parent_contexts);
+                request.context_id(), absl::MakeSpan(groups), &parent_contexts);
         if (!status.ok() && !absl::IsNotFound(status)) {
           return status;
         }
@@ -2259,15 +2271,17 @@ absl::Status MetadataStore::GetParentContextsByContext(
 }
 
 absl::Status MetadataStore::GetChildrenContextsByContext(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
     const GetChildrenContextsByContextRequest& request,
     GetChildrenContextsByContextResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         std::vector<Context> child_contexts;
         const absl::Status status =
             metadata_access_object_->FindChildContextsByContextId(
-                request.context_id(), &child_contexts);
+                request.context_id(), absl::MakeSpan(groups), &child_contexts);
         if (!status.ok() && !absl::IsNotFound(status)) {
           return status;
         }
@@ -2279,18 +2293,20 @@ absl::Status MetadataStore::GetChildrenContextsByContext(
 }
 
 absl::Status MetadataStore::GetParentContextsByContexts(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
     const GetParentContextsByContextsRequest& request,
     GetParentContextsByContextsResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         std::vector<int64_t> context_ids;
         std::copy(request.context_ids().begin(), request.context_ids().end(),
                   std::back_inserter(context_ids));
         absl::node_hash_map<int64_t, std::vector<Context>> parent_contexts;
         const absl::Status status =
             metadata_access_object_->FindParentContextsByContextIds(
-                context_ids, parent_contexts);
+                context_ids, absl::MakeSpan(groups), parent_contexts);
         if (!status.ok() && !absl::IsNotFound(status)) {
           return status;
         }
@@ -2306,18 +2322,20 @@ absl::Status MetadataStore::GetParentContextsByContexts(
 }
 
 absl::Status MetadataStore::GetChildrenContextsByContexts(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
     const GetChildrenContextsByContextsRequest& request,
     GetChildrenContextsByContextsResponse* response) {
   return transaction_executor_->Execute(
-      [this, &request, &response]() -> absl::Status {
+      [this, &request, &response, &MetadataContext]() -> absl::Status {
         response->Clear();
         std::vector<int64_t> context_ids;
+        std::vector<std::string> groups = ExtractGroupsFromMetadataContext(MetadataContext);
         std::copy(request.context_ids().begin(), request.context_ids().end(),
                   std::back_inserter(context_ids));
         absl::node_hash_map<int64_t, std::vector<Context>> child_contexts;
         const absl::Status status =
             metadata_access_object_->FindChildContextsByContextIds(
-                context_ids, child_contexts);
+                context_ids, absl::MakeSpan(groups), child_contexts);
         if (!status.ok() && !absl::IsNotFound(status)) {
           return status;
         }

@@ -539,7 +539,7 @@ class QueryExecutor {
   // Column 1: int: context id
   // Column 2: int: execution id
   virtual absl::Status SelectAssociationByContextIDs(
-      absl::Span<const int64_t> context_id, RecordSet* record_set) = 0;
+      absl::Span<const int64_t> context_id, absl::Span<std::string> groups, RecordSet* record_set) = 0;
 
   // Returns association triplets for the given execution ids.
   // Each triplet has:
@@ -561,7 +561,7 @@ class QueryExecutor {
   // Column 0: int: attribution id
   // Column 1: int: context id
   // Column 2: int: artifact id
-  virtual absl::Status SelectAttributionByContextID(int64_t context_id,
+  virtual absl::Status SelectAttributionByContextID(int64_t context_id, absl::Span<std::string> groups, 
                                                     RecordSet* record_set) = 0;
 
   // Returns attribution triplets for the given artifact ids. Each triplet has:
@@ -584,25 +584,25 @@ class QueryExecutor {
   // Column 0: int: context id (= context_id)
   // Column 1: int: parent context id
   virtual absl::Status SelectParentContextsByContextID(
-      int64_t context_id, RecordSet* record_set) = 0;
+      int64_t context_id, absl::Span<std::string> groups, RecordSet* record_set) = 0;
 
   // Returns child contexts for the given context id. Each record has:
   // Column 0: int: context id
   // Column 1: int: parent context id (= context_id)
   virtual absl::Status SelectChildContextsByContextID(
-      int64_t context_id, RecordSet* record_set) = 0;
+      int64_t context_id, absl::Span<std::string> groups, RecordSet* record_set) = 0;
 
   // Returns parent contexts for the given context ids. Each record has:
   // Column 0: int: context id (IN context_ids)
   // Column 1: int: parent context id
   virtual absl::Status SelectParentContextsByContextIDs(
-      absl::Span<const int64_t> context_ids, RecordSet* record_set) = 0;
+      absl::Span<const int64_t> context_ids, absl::Span<std::string> groups, RecordSet* record_set) = 0;
 
   // Returns child contexts for the given parent context ids. Each record has:
   // Column 0: int: context id
   // Column 1: int: parent context id (IN context_ids)
   virtual absl::Status SelectChildContextsByContextIDs(
-      absl::Span<const int64_t> context_ids, RecordSet* record_set) = 0;
+      absl::Span<const int64_t> context_ids, absl::Span<std::string> groups, RecordSet* record_set) = 0;
 
   // Checks the MLMDEnv table and query the schema version.
   // At MLMD release v0.13.2, by default it is v0.

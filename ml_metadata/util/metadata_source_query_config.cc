@@ -151,14 +151,16 @@ R"pb(
     parameter_num: 1
   }
   select_parent_contexts_by_context_ids {
-    query: " SELECT `context_id`, `parent_context_id` From `ParentContext` "
-           " WHERE `context_id` IN ($0); "
-    parameter_num: 1
+    query: " SELECT `P.context_id`, `P.parent_context_id` From `ParentContext` AS P"
+           " LEFT JOIN `Context` AS C ON (C.id = P.context_id) "
+           " WHERE `P.context_id` IN ($0) AND `C.registry_group` IN ($1); "
+    parameter_num: 2
   }
   select_parent_contexts_by_parent_context_ids {
-    query: " SELECT `context_id`, `parent_context_id` From `ParentContext` "
-           " WHERE `parent_context_id` IN ($0); "
-    parameter_num: 1
+    query: " SELECT `context_id`, `parent_context_id` From `ParentContext` AS P "
+           " LEFT JOIN `Context` AS C ON (C.id = P.context_id) "
+           " WHERE `P.parent_context_id` IN ($0) AND `C.registry_group` IN ($1); "
+    parameter_num: 2
   }
   drop_type_property_table {
     query: " DROP TABLE IF EXISTS `TypeProperty`; "
@@ -688,10 +690,11 @@ R"pb(
     parameter_num: 2
   }
   select_association_by_context_id {
-    query: " SELECT `id`, `context_id`, `execution_id` "
-           " from `Association` "
-           " WHERE `context_id` IN ($0); "
-    parameter_num: 1
+    query: " SELECT A.id, A.context_id, A.execution_id "
+           " FROM `Association` AS A "
+           " LEFT JOIN `Context` AS C ON (A.context_id = C.id) "
+           " WHERE A.context_id = $0 and C.registry_group IN ($1); "
+    parameter_num: 2
   }
   select_associations_by_execution_ids {
     query: " SELECT `id`, `context_id`, `execution_id` "
@@ -719,10 +722,11 @@ R"pb(
     parameter_num: 2
   }
   select_attribution_by_context_id {
-    query: " SELECT `id`, `context_id`, `artifact_id` "
-           " from `Attribution` "
-           " WHERE `context_id` = $0; "
-    parameter_num: 1
+    query: " SELECT A.id, A.context_id, A.artifact_id "
+           " FROM `Attribution` AS A "
+           " LEFT JOIN `Context` AS C ON (A.context_id = C.id) "
+           " WHERE A.context_id = $0 and C.registry_group IN ($1); "
+    parameter_num: 2
   }
   select_attributions_by_artifact_ids {
     query: " SELECT `id`, `context_id`, `artifact_id` "
@@ -4896,14 +4900,16 @@ R"pb(
     parameter_num: 1
   }
   select_parent_contexts_by_context_ids {
-    query: " SELECT context_id, parent_context_id From ParentContext "
-           " WHERE context_id IN ($0); "
-    parameter_num: 1
+    query: " SELECT P.context_id, P.parent_context_id From ParentContext AS P "
+           " LEFT JOIN Context AS C ON (P.context_id = C.id) "
+           " WHERE P.context_id IN ($0) AND C.registry_group IN ($1); "
+    parameter_num: 2
   }
   select_parent_contexts_by_parent_context_ids {
-    query: " SELECT context_id, parent_context_id From ParentContext "
-           " WHERE parent_context_id IN ($0); "
-    parameter_num: 1
+    query: " SELECT context_id, parent_context_id From ParentContext AS P "
+           " LEFT JOIN Context AS C ON (P.context_id = C.id) "
+           " WHERE P.parent_context_id IN ($0) AND C.registry_group IN ($1); "
+    parameter_num: 2
   }
   drop_type_property_table {
     query: " DROP TABLE IF EXISTS TypeProperty; "
@@ -5498,10 +5504,11 @@ R"pb(
     parameter_num: 2
   }
   select_association_by_context_id {
-    query: " SELECT id, context_id, execution_id "
-           " FROM Association "
-           " WHERE context_id IN ($0); "
-    parameter_num: 1
+    query: " SELECT A.id, A.context_id, A.execution_id "
+           " FROM Association AS A "
+           " LEFT JOIN Context AS C ON (A.context_id = C.id) "
+           " WHERE A.context_id = $0 and C.registry_group IN ($1); "
+    parameter_num: 2
   }
   select_associations_by_execution_ids {
     query: " SELECT id, context_id, execution_id "
@@ -5534,10 +5541,11 @@ R"pb(
     parameter_num: 2
   }
   select_attribution_by_context_id {
-    query: " SELECT id, context_id, artifact_id "
-           " FROM Attribution "
-           " WHERE context_id = $0; "
-    parameter_num: 1
+    query: " SELECT A.id, A.context_id, A.artifact_id "
+           " FROM Attribution AS A "
+           " LEFT JOIN Context AS C ON (A.context_id = C.id) "
+           " WHERE A.context_id = $0 and C.registry_group IN ($1); "
+    parameter_num: 2
   }
   select_attributions_by_artifact_ids {
     query: " SELECT id, context_id, artifact_id "

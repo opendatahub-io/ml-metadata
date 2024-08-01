@@ -474,18 +474,21 @@ class MetadataStore : public MetadataStoreServiceInterface {
   // Returns INVALID_ARGUMENT error, if no context matches the child_id.
   // Returns INVALID_ARGUMENT error, if no context matches the parent_id.
   // Returns ALREADY_EXISTS error, if the same parent context already exists.
-  absl::Status PutParentContexts(const PutParentContextsRequest& request,
+  absl::Status PutParentContexts(const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
+                                 const PutParentContextsRequest& request,
                                  PutParentContextsResponse* response) override;
 
   // Gets all context that an artifact is attributed to.
   // Returns detailed INTERNAL error, if query execution fails.
   absl::Status GetContextsByArtifact(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
       const GetContextsByArtifactRequest& request,
       GetContextsByArtifactResponse* response) override;
 
   // Gets all context that an execution is associated with.
   // Returns detailed INTERNAL error, if query execution fails.
   absl::Status GetContextsByExecution(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
       const GetContextsByExecutionRequest& request,
       GetContextsByExecutionResponse* response) override;
 
@@ -493,6 +496,7 @@ class MetadataStore : public MetadataStoreServiceInterface {
   // If option is not set in the request, then all artifacts are returned.
   // Returns detailed INTERNAL error, if query execution fails.
   absl::Status GetArtifactsByContext(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
       const GetArtifactsByContextRequest& request,
       GetArtifactsByContextResponse* response) override;
 
@@ -500,30 +504,35 @@ class MetadataStore : public MetadataStoreServiceInterface {
   // If option is not set in the request, then all executions are returned.
   // Returns detailed INTERNAL error, if query execution fails.
   absl::Status GetExecutionsByContext(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
       const GetExecutionsByContextRequest& request,
       GetExecutionsByContextResponse* response) override;
 
   // Gets all parent contexts of a context.
   // Returns detailed INTERNAL error, if query execution fails.
   absl::Status GetParentContextsByContext(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
       const GetParentContextsByContextRequest& request,
       GetParentContextsByContextResponse* response) override;
 
   // Gets all children contexts of a context.
   // Returns detailed INTERNAL error, if query execution fails.
   absl::Status GetChildrenContextsByContext(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
       const GetChildrenContextsByContextRequest& request,
       GetChildrenContextsByContextResponse* response) override;
 
   // Gets all parent contexts of a list of contexts.
   // Returns detailed INTERNAL error, if query execution fails.
   absl::Status GetParentContextsByContexts(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
       const GetParentContextsByContextsRequest& request,
       GetParentContextsByContextsResponse* response) override;
 
   // Gets all children contexts of a list of contexts.
   // Returns detailed INTERNAL error, if query execution fails.
   absl::Status GetChildrenContextsByContexts(
+    const std::multimap<grpc::string_ref, grpc::string_ref>* MetadataContext,
       const GetChildrenContextsByContextsRequest& request,
       GetChildrenContextsByContextsResponse* response) override;
 

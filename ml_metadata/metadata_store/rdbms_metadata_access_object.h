@@ -466,14 +466,14 @@ class RDBMSMetadataAccessObject : public MetadataAccessObject {
       absl::Span<const int64_t> artifact_ids,
       std::vector<Attribution>* attributions) final;
 
-  absl::Status FindContextsByExecution(int64_t execution_id,
+  absl::Status FindContextsByExecution(int64_t execution_id, absl::Span<std::string> groups, 
                                        std::vector<Context>* contexts) final;
 
   absl::Status FindExecutionsByContext(
-      int64_t context_id, std::vector<Execution>* executions) final;
+      int64_t context_id, absl::Span<std::string> groups, std::vector<Execution>* executions) final;
 
   absl::Status FindExecutionsByContext(
-      int64_t context_id, std::optional<ListOperationOptions> list_options,
+      int64_t context_id, std::optional<ListOperationOptions> list_options, absl::Span<std::string> groups,
       std::vector<Execution>* executions, std::string* next_page_token) final;
 
   absl::Status CreateAttribution(const Attribution& attribution,
@@ -483,30 +483,30 @@ class RDBMSMetadataAccessObject : public MetadataAccessObject {
                                  bool is_already_validated,
                                  int64_t* attribution_id) final;
 
-  absl::Status FindContextsByArtifact(int64_t artifact_id,
+  absl::Status FindContextsByArtifact(int64_t artifact_id, absl::Span<std::string> groups,
                                       std::vector<Context>* contexts) final;
 
-  absl::Status FindArtifactsByContext(int64_t context_id,
+  absl::Status FindArtifactsByContext(int64_t context_id, absl::Span<std::string> groups,
                                       std::vector<Artifact>* artifacts) final;
 
   absl::Status FindArtifactsByContext(
-      int64_t context_id, std::optional<ListOperationOptions> list_options,
+      int64_t context_id, std::optional<ListOperationOptions> list_options, absl::Span<std::string> groups,
       std::vector<Artifact>* artifacts, std::string* next_page_token) final;
 
-  absl::Status CreateParentContext(const ParentContext& parent_context) final;
+  absl::Status CreateParentContext(const ParentContext& parent_context, absl::Span<std::string> groups) final;
 
   absl::Status FindParentContextsByContextId(
-      int64_t context_id, std::vector<Context>* contexts) final;
+      int64_t context_id, absl::Span<std::string> groups, std::vector<Context>* contexts) final;
 
   absl::Status FindChildContextsByContextId(
-      int64_t context_id, std::vector<Context>* contexts) final;
+      int64_t context_id, absl::Span<std::string> groups, std::vector<Context>* contexts) final;
 
   absl::Status FindParentContextsByContextIds(
-      absl::Span<const int64_t> context_ids,
+      absl::Span<const int64_t> context_ids, absl::Span<std::string> groups, 
       absl::node_hash_map<int64_t, std::vector<Context>>& contexts) final;
 
   absl::Status FindChildContextsByContextIds(
-      absl::Span<const int64_t> context_ids,
+      absl::Span<const int64_t> context_ids, absl::Span<std::string> groups,
       absl::node_hash_map<int64_t, std::vector<Context>>& contexts) final;
 
   absl::Status GetSchemaVersion(int64_t* db_version) final {
@@ -943,7 +943,7 @@ class RDBMSMetadataAccessObject : public MetadataAccessObject {
   // If direction is kParent, then context_id is used to look for its parents.
   // If direction is kChild, then context_id is used to look for its children.
   absl::Status FindLinkedContextsImpl(int64_t context_id,
-                                      ParentContextTraverseDirection direction,
+                                      ParentContextTraverseDirection direction, absl::Span<std::string> groups,
                                       std::vector<Context>& output_contexts);
 
   // Gets the ParentContext with a context_ids list and returns a map of
@@ -953,6 +953,7 @@ class RDBMSMetadataAccessObject : public MetadataAccessObject {
   absl::Status FindLinkedContextsMapImpl(
       absl::Span<const int64_t> context_ids,
       ParentContextTraverseDirection direction,
+      absl::Span<std::string> groups,
       absl::node_hash_map<int64_t, std::vector<Context>>& output_contexts);
 
   // TODO(b/283852485): Deprecate GetLineageGraph API after migration to

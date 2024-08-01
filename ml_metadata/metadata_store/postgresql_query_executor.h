@@ -502,9 +502,10 @@ class PostgreSQLQueryExecutor : public QueryExecutor {
                                  int64_t* association_id) final;
 
   absl::Status SelectAssociationByContextIDs(
-      absl::Span<const int64_t> context_id, RecordSet* record_set) final {
+      absl::Span<const int64_t> context_id, absl::Span<std::string> groups, RecordSet* record_set) final {
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
     return ExecuteQuery(query_config_.select_association_by_context_id(),
-                        {Bind(context_id)}, record_set);
+                        {Bind(context_id), Bind(absl::MakeSpan(groups_view))}, record_set);
   }
 
   absl::Status SelectAssociationsByExecutionIds(
@@ -518,10 +519,11 @@ class PostgreSQLQueryExecutor : public QueryExecutor {
   absl::Status InsertAttributionDirect(int64_t context_id, int64_t artifact_id,
                                        int64_t* attribution_id) final;
 
-  absl::Status SelectAttributionByContextID(int64_t context_id,
+  absl::Status SelectAttributionByContextID(int64_t context_id, absl::Span<std::string> groups, 
                                             RecordSet* record_set) final {
+    std::vector<absl::string_view> groups_view = {groups.begin(), groups.end()};
     return ExecuteQuery(query_config_.select_attribution_by_context_id(),
-                        {Bind(context_id)}, record_set);
+                        {Bind(context_id), Bind(absl::MakeSpan(groups_view))}, record_set);
   }
 
   absl::Status SelectAttributionsByArtifactIds(
@@ -535,15 +537,15 @@ class PostgreSQLQueryExecutor : public QueryExecutor {
   absl::Status InsertParentContext(int64_t parent_id, int64_t child_id) final;
 
   absl::Status SelectParentContextsByContextIDs(
-      absl::Span<const int64_t> context_id, RecordSet* record_set) final;
+      absl::Span<const int64_t> context_id, absl::Span<std::string> groups, RecordSet* record_set) final;
 
   absl::Status SelectChildContextsByContextIDs(
-      absl::Span<const int64_t> context_id, RecordSet* record_set) final;
+      absl::Span<const int64_t> context_id, absl::Span<std::string> groups, RecordSet* record_set) final;
 
-  absl::Status SelectParentContextsByContextID(int64_t context_id,
+  absl::Status SelectParentContextsByContextID(int64_t context_id, absl::Span<std::string> groups,
                                                RecordSet* record_set) final;
 
-  absl::Status SelectChildContextsByContextID(int64_t context_id,
+  absl::Status SelectChildContextsByContextID(int64_t context_id, absl::Span<std::string> groups,
                                               RecordSet* record_set) final;
 
   absl::Status CheckMLMDEnvTable() final;
