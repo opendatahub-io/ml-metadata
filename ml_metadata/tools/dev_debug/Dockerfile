@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Choose docker base image.
-FROM ubuntu:20.04 as builder
+FROM ubuntu:24.04 as builder
 
 # Install required dependencies.
 RUN export DEBIAN_FRONTEND=noninteractive && \
