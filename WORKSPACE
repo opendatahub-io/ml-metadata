@@ -267,14 +267,8 @@ http_archive(
     url = "https://github.com/gflags/gflags/archive/a738fdf9338412f83ab3f26f31ac11ed3f3ec4bd.zip",
 )
 
-<<<<<<< HEAD
-# TODO: can we import the proper zetasql version based on some config provided in the build command?
-# Required for Fedora39 and ubi8
-ZETASQL_COMMIT = "ac37cf5c0d80b5605176fc0f29e87b12f00be693" # 08/10/2022
-=======
 # UBI9-compatible ZetaSQL (protobuf 23 patch in ml_metadata/third_party/zetasql.patch)
 ZETASQL_COMMIT = "f764f4e986ac1516ab5ae95e6d6ce2f4416cc6ff" # 02/03/2023
->>>>>>> 153c47c (Upgrade gRPC and protobuf for HTTP/2 CVE fixes while keeping ZetaSQL.)
 http_archive(
     name = "com_google_zetasql",
     urls = ["https://github.com/google/zetasql/archive/%s.zip" % ZETASQL_COMMIT],
